@@ -191,6 +191,10 @@ button.primary {
   font-size: 0.9rem;
 }
 
+.rejected {
+  margin-top: 8px;
+}
+
 .good {
   color: var(--good);
   font-style: normal;
