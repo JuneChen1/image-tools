@@ -1,8 +1,12 @@
 import { useRef, useState } from 'react'
 import { useI18n } from '../i18n'
+import { isHeicFile } from '../utils/decode'
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
-const ACCEPT_ATTR = ACCEPTED_TYPES.join(',')
+// HEIC 的 type 常被回報成空字串，所以另外用副檔名放行
+const ACCEPT_ATTR = [...ACCEPTED_TYPES, 'image/heic', 'image/heif', '.heic', '.heif'].join(',')
+
+const isAccepted = (file: File) => ACCEPTED_TYPES.includes(file.type) || isHeicFile(file)
 
 interface Props {
   multiple?: boolean
@@ -18,8 +22,8 @@ export default function Dropzone({ multiple = false, label, onFiles }: Props) {
 
   function pick(list: FileList | null) {
     const all = Array.from(list ?? [])
-    const files = all.filter((f) => ACCEPTED_TYPES.includes(f.type))
-    setRejected(all.filter((f) => !ACCEPTED_TYPES.includes(f.type)).map((f) => f.name))
+    const files = all.filter(isAccepted)
+    setRejected(all.filter((f) => !isAccepted(f)).map((f) => f.name))
     if (files.length > 0) onFiles(multiple ? files : files.slice(0, 1))
   }
 

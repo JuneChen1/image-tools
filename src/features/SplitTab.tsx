@@ -12,7 +12,7 @@ import {
   splitBounds,
   type Format,
 } from '../utils/image'
-import { processImage } from '../utils/processImage'
+import { probeImage, processImage } from '../utils/processImage'
 
 /** X 一則貼文最多 4 張圖 */
 const COUNT_CHOICES = [2, 3, 4]
@@ -44,20 +44,28 @@ export default function SplitTab() {
   const sourceRef = useRef<Source | null>(null)
   // 目前畫面上顯示的結果縮圖網址；新結果出來後才釋放，處理期間舊縮圖不會變成破圖
   const partUrlsRef = useRef<string[]>([])
+  // 連續選檔時，只採用最後一次選的結果
+  const probeTicketRef = useRef(0)
 
   async function handleFiles(files: File[]) {
+    const ticket = ++probeTicketRef.current
     try {
-      // 只為了取得寬高；實際的切割與編碼在 Worker 內進行
-      const bitmap = await createImageBitmap(files[0])
-      const { width, height } = bitmap
-      bitmap.close()
-      const next = { file: files[0], width, height, url: URL.createObjectURL(files[0]) }
+      // 取得寬高；HEIC 等瀏覽器無法直接顯示的格式會另外附上預覽圖。解碼在 Worker 內進行
+      const info = await probeImage(files[0])
+      if (ticket !== probeTicketRef.current) return
+      const next = {
+        file: files[0],
+        width: info.width,
+        height: info.height,
+        url: URL.createObjectURL(info.preview ?? files[0]),
+      }
       if (sourceRef.current) URL.revokeObjectURL(sourceRef.current.url)
       sourceRef.current = next
       setSource(next)
       setError(null)
-    } catch {
-      setError(new ImageError('readFailed'))
+    } catch (e) {
+      if (ticket !== probeTicketRef.current) return
+      setError(e instanceof ImageError ? e : new ImageError('readFailed'))
     }
   }
 

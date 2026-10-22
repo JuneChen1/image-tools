@@ -1,5 +1,8 @@
-import type { WorkerRequest, WorkerResponse } from '../workers/protocol'
+import type { OkResponse, WorkerRequest, WorkerResponse } from '../workers/protocol'
+import { decodeImage, probeImageFile, type ProbeResult } from './decode'
 import { ImageError, renderBlob, type RenderOptions, type RenderResult } from './image'
+
+export type { ProbeResult }
 
 /** 呼叫端中途取消（例如使用者又改了設定），結果不需要了 */
 export class AbortedError extends Error {
@@ -9,7 +12,7 @@ export class AbortedError extends Error {
 }
 
 interface Pending {
-  resolve: (results: RenderResult[]) => void
+  resolve: (response: OkResponse) => void
   reject: (error: Error) => void
 }
 
@@ -44,7 +47,7 @@ function getWorker(): Worker {
     if (!entry) return // 已被取消的工作，結果直接丟掉
     pending.delete(response.id)
 
-    if (response.ok) entry.resolve(response.results)
+    if (response.ok) entry.resolve(response)
     else if ('cancelled' in response) entry.reject(new AbortedError())
     else if ('code' in response) entry.reject(new ImageError(response.code, response.detail))
     else entry.reject(new Error(response.message))
@@ -62,11 +65,11 @@ function getWorker(): Worker {
   return created
 }
 
-function runInWorker(
-  file: File,
-  jobs: RenderOptions[],
+/** 送一個工作給 Worker，等它回覆；signal 被取消時會通知 Worker 並丟掉結果 */
+function dispatch(
+  build: (id: number) => WorkerRequest,
   signal?: AbortSignal,
-): Promise<RenderResult[]> {
+): Promise<OkResponse> {
   if (signal?.aborted) return Promise.reject(new AbortedError())
 
   const target = getWorker()
@@ -80,9 +83,9 @@ function runInWorker(
     }
 
     pending.set(id, {
-      resolve: (results) => {
+      resolve: (response) => {
         signal?.removeEventListener('abort', onAbort)
-        resolve(results)
+        resolve(response)
       },
       reject: (error) => {
         signal?.removeEventListener('abort', onAbort)
@@ -90,19 +93,19 @@ function runInWorker(
       },
     })
     signal?.addEventListener('abort', onAbort, { once: true })
-    target.postMessage({ type: 'render', id, file, jobs } satisfies WorkerRequest)
+    target.postMessage(build(id))
   })
 }
 
 /** Worker 不能用時的備案：在主執行緒處理，功能一樣但處理期間畫面會卡住 */
-async function runOnMainThread(
+async function renderOnMainThread(
   file: File,
   jobs: RenderOptions[],
   signal?: AbortSignal,
 ): Promise<RenderResult[]> {
   let bitmap: ImageBitmap
   try {
-    bitmap = await createImageBitmap(file)
+    bitmap = await decodeImage(file)
   } catch {
     throw new ImageError('readFailed')
   }
@@ -118,24 +121,55 @@ async function runOnMainThread(
   }
 }
 
-/**
- * 處理一張圖，輸出 jobs 指定的多個結果（順序與 jobs 相同）。
- * 預設在 Web Worker 內處理，畫面不會被大圖或 AVIF 編碼卡住。
- */
-export async function processImage(
-  file: File,
-  jobs: RenderOptions[],
-  signal?: AbortSignal,
-): Promise<RenderResult[]> {
+async function probeOnMainThread(file: File): Promise<ProbeResult> {
+  try {
+    return await probeImageFile(file)
+  } catch (error) {
+    throw error instanceof ImageError ? error : new ImageError('readFailed')
+  }
+}
+
+/** 先試 Worker；Worker 本身出問題（不是圖片的問題）就改用主執行緒，之後也都走主執行緒 */
+async function withFallback<T>(inWorker: () => Promise<T>, onMainThread: () => Promise<T>): Promise<T> {
   if (workerSupported()) {
     try {
-      return await runInWorker(file, jobs, signal)
+      return await inWorker()
     } catch (error) {
       if (error instanceof ImageError || error instanceof AbortedError) throw error
-      // Worker 本身出問題：之後都改用主執行緒，並重做這一次
       console.warn('Image worker failed, falling back to main thread', error)
       workerBroken = true
     }
   }
-  return runOnMainThread(file, jobs, signal)
+  return onMainThread()
+}
+
+/**
+ * 處理一張圖，輸出 jobs 指定的多個結果（順序與 jobs 相同）。
+ * 預設在 Web Worker 內處理，畫面不會被大圖或 AVIF 編碼卡住。
+ */
+export function processImage(
+  file: File,
+  jobs: RenderOptions[],
+  signal?: AbortSignal,
+): Promise<RenderResult[]> {
+  return withFallback(
+    async () => {
+      const response = await dispatch((id) => ({ type: 'render', id, file, jobs }), signal)
+      if (!('results' in response)) throw new Error('unexpected worker response')
+      return response.results
+    },
+    () => renderOnMainThread(file, jobs, signal),
+  )
+}
+
+/** 取得圖片尺寸；HEIC 等瀏覽器無法直接顯示的格式另外附上預覽圖 */
+export function probeImage(file: File, signal?: AbortSignal): Promise<ProbeResult> {
+  return withFallback(
+    async () => {
+      const response = await dispatch((id) => ({ type: 'probe', id, file }), signal)
+      if (!('probe' in response)) throw new Error('unexpected worker response')
+      return response.probe
+    },
+    () => probeOnMainThread(file),
+  )
 }

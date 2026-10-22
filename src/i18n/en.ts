@@ -16,7 +16,7 @@ export const en: Messages = {
     avifSlowNote: 'AVIF encoding is slow. Large images can take several seconds or more.',
   },
   dropzone: {
-    hint: 'Drop images here, or click to choose files (JPEG, PNG, WebP, AVIF supported)',
+    hint: 'Drop images here, or click to choose files (JPEG, PNG, WebP, AVIF, HEIC supported)',
     rejected: (count, names) =>
       `Skipped ${count} unsupported ${count === 1 ? 'file' : 'files'}: ${names}`,
   },

@@ -14,7 +14,7 @@ export const zh = {
     avifSlowNote: 'AVIF 的編碼速度較慢，大張圖片可能需要數秒到數十秒，請耐心等待。',
   },
   dropzone: {
-    hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF）',
+    hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF、HEIC）',
     rejected: (count: number, names: string) => `已略過 ${count} 個不支援的檔案：${names}`,
   },
   errors: {
