@@ -15,6 +15,7 @@ export const zh = {
   },
   dropzone: {
     hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF、HEIC）',
+    singleOnly: '一次只能處理一張圖片，請只選擇一張。',
     rejected: (count: number, names: string) => `已略過 ${count} 個不支援的檔案：${names}`,
   },
   errors: {

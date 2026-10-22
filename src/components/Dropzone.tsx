@@ -19,12 +19,17 @@ export default function Dropzone({ multiple = false, label, onFiles }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [rejected, setRejected] = useState<string[]>([])
+  const [tooMany, setTooMany] = useState(false)
 
   function pick(list: FileList | null) {
     const all = Array.from(list ?? [])
     const files = all.filter(isAccepted)
     setRejected(all.filter((f) => !isAccepted(f)).map((f) => f.name))
-    if (files.length > 0) onFiles(multiple ? files : files.slice(0, 1))
+
+    // 只收一張的上傳區（切圖）：選了多張就整批不處理並提示，不要悄悄只挑第一張
+    const exceeds = !multiple && files.length > 1
+    setTooMany(exceeds)
+    if (!exceeds && files.length > 0) onFiles(files)
   }
 
   return (
@@ -79,6 +84,7 @@ export default function Dropzone({ multiple = false, label, onFiles }: Props) {
           }}
         />
       </div>
+      {tooMany && <p className="error rejected">{m.dropzone.singleOnly}</p>}
       {rejected.length > 0 && (
         <p className="error rejected">
           {m.dropzone.rejected(rejected.length, rejected.join(m.listSep))}

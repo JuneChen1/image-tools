@@ -17,6 +17,7 @@ export const en: Messages = {
   },
   dropzone: {
     hint: 'Drop images here, or click to choose files (JPEG, PNG, WebP, AVIF, HEIC supported)',
+    singleOnly: 'Only one image can be processed at a time. Please choose just one.',
     rejected: (count, names) =>
       `Skipped ${count} unsupported ${count === 1 ? 'file' : 'files'}: ${names}`,
   },
