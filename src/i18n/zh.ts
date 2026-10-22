@@ -1,7 +1,6 @@
 export const zh = {
   htmlLang: 'zh-Hant',
   siteTitle: '圖片工具箱',
-  tagline: '所有處理都在你的瀏覽器內完成，圖片不會上傳到任何伺服器。',
   langSwitchLabel: '語言',
   listSep: '、',
   tabs: { split: '切圖', compress: '圖片壓縮', convert: '圖片轉檔' },

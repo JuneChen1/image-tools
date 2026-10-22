@@ -3,7 +3,6 @@ import type { Messages } from './zh'
 export const en: Messages = {
   htmlLang: 'en',
   siteTitle: 'Image Toolbox',
-  tagline: 'Everything runs in your browser. Your images are never uploaded to any server.',
   langSwitchLabel: 'Language',
   listSep: ', ',
   tabs: { split: 'Split', compress: 'Compress', convert: 'Convert' },

@@ -47,6 +47,20 @@ export default function Dropzone({ multiple = false, label, onFiles }: Props) {
           pick(e.dataTransfer.files)
         }}
       >
+        <svg
+          className="dropzone-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 16V4" />
+          <path d="m7 9 5-5 5 5" />
+          <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+        </svg>
         <p>{label}</p>
         <span>{m.dropzone.hint}</span>
         <input

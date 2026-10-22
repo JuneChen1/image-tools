@@ -20,23 +20,19 @@ function App() {
   return (
     <main className="app">
       <header className="app-head">
-        <div>
-          <h1>{m.siteTitle}</h1>
-          <p>{m.tagline}</p>
-        </div>
-        <div className="segmented" role="group" aria-label={m.langSwitchLabel}>
+        <h1>{m.siteTitle}</h1>
+        <select
+          className="lang-select"
+          value={lang}
+          aria-label={m.langSwitchLabel}
+          onChange={(e) => setLang(e.target.value as Lang)}
+        >
           {LANGS.map((l) => (
-            <button
-              key={l.id}
-              className={l.id === lang ? 'active' : ''}
-              aria-pressed={l.id === lang}
-              lang={l.id === 'zh' ? 'zh-Hant' : 'en'}
-              onClick={() => setLang(l.id)}
-            >
+            <option key={l.id} value={l.id} lang={l.id === 'zh' ? 'zh-Hant' : 'en'}>
               {l.label}
-            </button>
+            </option>
           ))}
-        </div>
+        </select>
       </header>
 
       <nav className="tabs" role="tablist">

@@ -125,7 +125,7 @@ export default function SplitTab() {
                 />
               ))}
             </div>
-            <p className="hint">
+            <p className="hint num">
               {source.file.name}・{source.bitmap.width} × {source.bitmap.height}・
               {formatSize(source.file.size)}
             </p>
@@ -161,7 +161,7 @@ export default function SplitTab() {
               </label>
               {format !== 'image/png' && (
                 <label>
-                  {m.common.quality} {quality}
+                  {m.common.quality} <span className="num">{quality}</span>
                   <input
                     type="range"
                     min={50}

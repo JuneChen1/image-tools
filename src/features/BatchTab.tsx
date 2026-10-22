@@ -142,7 +142,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
             </label>
             {showQuality && (
               <label>
-                {m.common.quality} {quality}
+                {m.common.quality} <span className="num">{quality}</span>
                 <input
                   type="range"
                   min={10}
