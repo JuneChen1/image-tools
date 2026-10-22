@@ -38,7 +38,7 @@ export const en: Messages = {
     countOption: (count) => `${count} parts`,
     pngRecommended: ' (lossless, recommended)',
     resultTitle: 'Result',
-    numbering: (count) => `Numbered 1–${count} from left to right. Upload them in this order.`,
+    numbering: (count) => `Numbered 1–${count} from left to right. To post them to X as one large image, upload them in this order.`,
   },
   batch: {
     compressDropLabel: 'Choose images to compress (multiple allowed)',

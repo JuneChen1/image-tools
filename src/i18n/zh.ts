@@ -35,7 +35,7 @@ export const zh = {
     countOption: (count: number) => `${count} 張`,
     pngRecommended: '（無損，建議）',
     resultTitle: '切割結果',
-    numbering: (count: number) => `由左到右依序編號為 1 ～ ${count}，上傳時請照這個順序。`,
+    numbering: (count: number) => `由左到右依序編號為 1 ～ ${count}，如要發文到 X 形成大圖，請照這個順序上傳。`,
   },
   batch: {
     compressDropLabel: '選擇要壓縮的圖片（可多選）',
