@@ -245,6 +245,10 @@ button.primary:hover {
   text-transform: none;
 }
 
+.options select {
+  height: 32px; /* 固定高度，才能和旁邊滑桿的橫線對齊（見 input[type='range']） */
+}
+
 select {
   padding: 4px 24px 4px 0;
   border: 0;
@@ -278,8 +282,13 @@ select:focus-visible {
 
 input[type='range'] {
   width: 180px;
-  height: 20px;
-  margin: 0;
+  height: 16px;
+  /*
+   * 橫線要和旁邊下拉選單的底線同一高度：
+   * 選單固定 32px 高，品質欄是 數字 24px + 間距 8px，再往上收 8px，
+   * 軌道（在滑桿高度的正中央）就剛好落在選單底線的位置
+   */
+  margin: -8px 0 0;
   background: transparent;
   appearance: none;
   -webkit-appearance: none;
@@ -312,6 +321,35 @@ input[type='range']::-moz-range-thumb {
   border: 0;
   border-radius: 50%;
   background: var(--color-fg);
+}
+
+/* 滑桿與色彩輸入聚焦時不顯示外框：滑桿改成圓點放大，色彩輸入改成框線變深 */
+input[type='range']:focus-visible,
+.options input[type='color']:focus-visible {
+  outline: none;
+}
+
+input[type='range']:focus-visible::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+}
+
+input[type='range']:focus-visible::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.options input[type='color']:focus-visible {
+  border-color: var(--color-fg);
+}
+
+/* 設定欄位旁的數值（例如品質）要看得清楚，比小標題大 */
+.options label .num {
+  color: var(--color-fg);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 /* 文字 */
