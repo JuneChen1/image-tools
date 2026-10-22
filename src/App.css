@@ -153,10 +153,31 @@ button.primary:hover {
 
 .card-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
   margin-bottom: 20px;
+}
+
+/* 結果區的按鈕：分享 / 下載；分享失敗的提示顯示在按鈕下方 */
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+}
+
+.card-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-md);
+}
+
+.card-actions .error {
+  text-align: right;
 }
 
 .card-head h2 {

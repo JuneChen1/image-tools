@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
+import ResultActions from '../components/ResultActions'
 import { describeError, useI18n } from '../i18n'
 import {
   FORMAT_EXT,
@@ -7,7 +8,6 @@ import {
   ImageError,
   baseName,
   downloadBlob,
-  downloadZip,
   formatSize,
   splitBounds,
   type Format,
@@ -205,17 +205,10 @@ export default function SplitTab() {
             <section className="card">
               <div className="card-head">
                 <h2>{m.split.resultTitle}</h2>
-                <button
-                  className="primary"
-                  onClick={() =>
-                    downloadZip(
-                      parts.map((p) => ({ name: p.name, blob: p.blob })),
-                      `${baseName(source.file.name)}_split.zip`,
-                    )
-                  }
-                >
-                  {m.common.downloadAll}
-                </button>
+                <ResultActions
+                  items={parts.map((p) => ({ name: p.name, blob: p.blob }))}
+                  zipName={`${baseName(source.file.name)}_split.zip`}
+                />
               </div>
               <div
                 className="parts-row"

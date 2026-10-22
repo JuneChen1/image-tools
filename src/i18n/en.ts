@@ -9,6 +9,8 @@ export const en: Messages = {
   common: {
     download: 'Download',
     downloadAll: 'Download all (ZIP)',
+    share: 'Share / Save to Photos',
+    shareFailed: 'Could not open the share sheet. Please use Download instead.',
     clearAll: 'Clear all',
     outputFormat: 'Output format',
     quality: 'Quality',

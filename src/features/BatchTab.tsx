@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
+import ResultActions from '../components/ResultActions'
 import { describeError, useI18n } from '../i18n'
 import {
   FORMAT_EXT,
@@ -7,7 +8,6 @@ import {
   ImageError,
   baseName,
   downloadBlob,
-  downloadZip,
   formatSize,
   resolveOutputFormat,
   type Format,
@@ -206,17 +206,10 @@ export default function BatchTab({ mode }: { mode: Mode }) {
               {m.batch.resultsTitle} {busy && <small>{m.common.processing}</small>}
             </h2>
             {done.length > 0 && (
-              <button
-                className="primary"
-                onClick={() =>
-                  downloadZip(
-                    done.map((r) => ({ name: r.name, blob: r.blob! })),
-                    zipName,
-                  )
-                }
-              >
-                {m.common.downloadAll}
-              </button>
+              <ResultActions
+                items={done.map((r) => ({ name: r.name, blob: r.blob! }))}
+                zipName={zipName}
+              />
             )}
           </div>
 
