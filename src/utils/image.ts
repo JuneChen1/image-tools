@@ -20,6 +20,7 @@ export type ImageErrorCode =
   | 'formatUnsupported'
   | 'readFailed'
   | 'tooNarrow'
+  | 'tooLarge'
 
 /** 錯誤只帶代碼與參數，顯示文字交給 i18n，這樣切換語言時訊息會跟著變 */
 export class ImageError extends Error {

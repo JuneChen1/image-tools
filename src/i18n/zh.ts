@@ -17,6 +17,8 @@ export const zh = {
     hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF、HEIC）',
     singleOnly: '一次只能處理一張圖片，請只選擇一張。',
     limit: (max: number, skipped: number) => `一次最多處理 ${max} 張，已略過 ${skipped} 張。`,
+    tooBig: (count: number, mb: number, names: string) =>
+      `已略過 ${count} 個過大的檔案（單檔上限 ${mb} MB）：${names}`,
     rejected: (count: number, names: string) => `已略過 ${count} 個不支援的檔案：${names}`,
   },
   errors: {
@@ -26,6 +28,7 @@ export const zh = {
     formatUnsupported: (format: string) => `這個瀏覽器不支援輸出 ${format}`,
     readFailed: '無法讀取這張圖片，請確認格式是否正確',
     tooNarrow: (count: number) => `圖片寬度太小，無法切成 ${count} 張`,
+    tooLarge: (megapixels: number) => `圖片像素過多（上限 ${megapixels * 100} 萬像素），已略過`,
   },
   split: {
     dropLabel: '選擇要切開的圖片',

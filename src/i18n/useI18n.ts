@@ -32,5 +32,7 @@ export function describeError(error: unknown, m: Messages): string {
       return m.errors.formatUnsupported(FORMAT_LABEL[error.detail as keyof typeof FORMAT_LABEL])
     case 'tooNarrow':
       return m.errors.tooNarrow(Number(error.detail))
+    case 'tooLarge':
+      return m.errors.tooLarge(Number(error.detail))
   }
 }

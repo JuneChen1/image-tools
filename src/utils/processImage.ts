@@ -106,8 +106,8 @@ async function renderOnMainThread(
   let bitmap: ImageBitmap
   try {
     bitmap = await decodeImage(file)
-  } catch {
-    throw new ImageError('readFailed')
+  } catch (error) {
+    throw error instanceof ImageError ? error : new ImageError('readFailed')
   }
   try {
     const results: RenderResult[] = []

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useI18n } from '../i18n'
 import { isHeicFile } from '../utils/decode'
+import { MAX_FILE_BYTES, MAX_FILE_MB } from '../utils/limits'
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
 // HEIC 的 type 常被回報成空字串，所以另外用副檔名放行
@@ -29,13 +30,17 @@ export default function Dropzone({
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [rejected, setRejected] = useState<string[]>([])
+  const [oversized, setOversized] = useState<string[]>([])
   const [tooMany, setTooMany] = useState(false)
   const [skipped, setSkipped] = useState(0)
 
   function pick(list: FileList | null) {
     const all = Array.from(list ?? [])
-    const files = all.filter(isAccepted)
+    const accepted = all.filter(isAccepted)
+    // 檔案太大的直接略過並提示；像素太多的要解碼後才知道，在處理階段另外擋
+    const files = accepted.filter((f) => f.size <= MAX_FILE_BYTES)
     setRejected(all.filter((f) => !isAccepted(f)).map((f) => f.name))
+    setOversized(accepted.filter((f) => f.size > MAX_FILE_BYTES).map((f) => f.name))
 
     // 只收一張的上傳區（切圖）：選了多張就整批不處理並提示，不要悄悄只挑第一張
     const exceeds = !multiple && files.length > 1
@@ -105,6 +110,11 @@ export default function Dropzone({
       {/* 清單清空後（名額又有了），過期的超量提示就不再顯示 */}
       {maxFiles !== undefined && skipped > 0 && currentCount >= maxFiles && (
         <p className="error rejected">{m.dropzone.limit(maxFiles, skipped)}</p>
+      )}
+      {oversized.length > 0 && (
+        <p className="error rejected">
+          {m.dropzone.tooBig(oversized.length, MAX_FILE_MB, oversized.join(m.listSep))}
+        </p>
       )}
       {rejected.length > 0 && (
         <p className="error rejected">

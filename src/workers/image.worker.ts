@@ -18,8 +18,9 @@ async function render({ id, file, jobs }: RenderRequest): Promise<WorkerResponse
   let bitmap: ImageBitmap
   try {
     bitmap = await decodeImage(file)
-  } catch {
-    throw new ImageError('readFailed')
+  } catch (error) {
+    // 「太大」要保留原本的錯誤，其他解碼失敗才統一視為讀取失敗
+    throw error instanceof ImageError ? error : new ImageError('readFailed')
   }
 
   try {

@@ -20,6 +20,8 @@ export const en: Messages = {
     singleOnly: 'Only one image can be processed at a time. Please choose just one.',
     limit: (max, skipped) =>
       `Up to ${max} images at a time. Skipped ${skipped} ${skipped === 1 ? 'image' : 'images'}.`,
+    tooBig: (count, mb, names) =>
+      `Skipped ${count} oversized ${count === 1 ? 'file' : 'files'} (limit ${mb} MB per file): ${names}`,
     rejected: (count, names) =>
       `Skipped ${count} unsupported ${count === 1 ? 'file' : 'files'}: ${names}`,
   },
@@ -30,6 +32,8 @@ export const en: Messages = {
     formatUnsupported: (format) => `This browser cannot export ${format}`,
     readFailed: 'Could not read this image. Please check the file format.',
     tooNarrow: (count) => `The image is too narrow to split into ${count} parts`,
+    tooLarge: (megapixels) =>
+      `This image has too many pixels (limit ${megapixels} megapixels). Skipped.`,
   },
   split: {
     dropLabel: 'Choose an image to split',

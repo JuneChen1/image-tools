@@ -1,4 +1,5 @@
-import { renderBlob } from './image'
+import { ImageError, renderBlob } from './image'
+import { MAX_MEGAPIXELS, MAX_PIXELS } from './limits'
 
 /** 預覽圖的最長邊上限；預覽只是給人看，不需要原尺寸 */
 const PREVIEW_MAX_EDGE = 1600
@@ -40,12 +41,20 @@ async function decodeHeic(file: File): Promise<ImageBitmap> {
  * 先交給瀏覽器原生解碼；HEIC 在多數瀏覽器不支援，原生失敗才改用 WebAssembly。
  */
 export async function decodeImage(file: File): Promise<ImageBitmap> {
+  let bitmap: ImageBitmap
   try {
-    return await createImageBitmap(file)
+    bitmap = await createImageBitmap(file)
   } catch (error) {
     if (!isHeicFile(file)) throw error
-    return decodeHeic(file)
+    bitmap = await decodeHeic(file)
   }
+
+  // 像素太多的圖後面一定會失敗（記憶體、Canvas 上限），在這裡就擋下並說清楚原因
+  if (bitmap.width * bitmap.height > MAX_PIXELS) {
+    bitmap.close()
+    throw new ImageError('tooLarge', MAX_MEGAPIXELS)
+  }
+  return bitmap
 }
 
 /** 取得尺寸；HEIC 另外產生瀏覽器能顯示的預覽圖。主執行緒與 Worker 共用 */
