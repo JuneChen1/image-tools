@@ -29,8 +29,9 @@ function App() {
           aria-label={m.langSwitchLabel}
           onChange={(e) => setLang(e.target.value as Lang)}
         >
+          {/* 目前的語言只在收合時顯示，展開的清單只列其他語言 */}
           {LANGS.map((l) => (
-            <option key={l.id} value={l.id} lang={l.htmlLang}>
+            <option key={l.id} value={l.id} lang={l.htmlLang} hidden={l.id === lang}>
               {l.label}
             </option>
           ))}
