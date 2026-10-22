@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
 import { describeError, useI18n } from '../i18n'
 import {
@@ -9,9 +9,9 @@ import {
   downloadBlob,
   downloadZip,
   formatSize,
-  renderBlob,
   type Format,
 } from '../utils/image'
+import { processImage } from '../utils/processImage'
 
 type Mode = 'compress' | 'convert'
 type FormatChoice = Format | 'keep'
@@ -50,12 +50,17 @@ export default function BatchTab({ mode }: { mode: Mode }) {
   const [background, setBackground] = useState('#ffffff')
   const [results, setResults] = useState<Result[]>([])
   const [busy, setBusy] = useState(false)
+  // 目前畫面上顯示的結果縮圖網址；新結果出來後才釋放，處理期間舊縮圖不會變成破圖
+  const resultUrlsRef = useRef<string[]>([])
 
   const { zipName, suffix } = OUTPUT[mode]
 
+  useEffect(() => () => resultUrlsRef.current.forEach((u) => URL.revokeObjectURL(u)), [])
+
   useEffect(() => {
     if (files.length === 0) return
-    let cancelled = false
+    const controller = new AbortController()
+    const { signal } = controller
     const urls: string[] = []
 
     const timer = setTimeout(async () => {
@@ -65,35 +70,34 @@ export default function BatchTab({ mode }: { mode: Mode }) {
         const format = resolveFormat(file, choice)
         const name = `${baseName(file.name)}${suffix}.${FORMAT_EXT[format]}`
         try {
-          const bitmap = await createImageBitmap(file)
-          try {
-            const { blob, width, height } = await renderBlob(bitmap, {
-              maxEdge: maxEdge || undefined,
-              format,
-              quality: quality / 100,
-              background,
-            })
-            const url = URL.createObjectURL(blob)
-            urls.push(url)
-            next.push({ file, name, blob, url, width, height })
-          } finally {
-            bitmap.close()
-          }
+          const [{ blob, width, height }] = await processImage(
+            file,
+            [{ maxEdge: maxEdge || undefined, format, quality: quality / 100, background }],
+            signal,
+          )
+          const url = URL.createObjectURL(blob)
+          urls.push(url)
+          next.push({ file, name, blob, url, width, height })
         } catch (e) {
+          if (signal.aborted) return
           next.push({
             file,
             name,
             error: e instanceof ImageError ? e : new ImageError('readFailed'),
           })
         }
-        if (cancelled) return
       }
+      // 新結果接手顯示後，才釋放舊的縮圖網址
+      const previous = resultUrlsRef.current
+      resultUrlsRef.current = [...urls]
+      urls.length = 0
+      previous.forEach((u) => URL.revokeObjectURL(u))
       setResults(next)
       setBusy(false)
     }, 250)
 
     return () => {
-      cancelled = true
+      controller.abort()
       clearTimeout(timer)
       urls.forEach((u) => URL.revokeObjectURL(u))
     }
@@ -121,6 +125,8 @@ export default function BatchTab({ mode }: { mode: Mode }) {
             <h2>{m.batch.settingsTitle}</h2>
             <button
               onClick={() => {
+                resultUrlsRef.current.forEach((u) => URL.revokeObjectURL(u))
+                resultUrlsRef.current = []
                 setFiles([])
                 setResults([])
                 setBusy(false)
@@ -190,7 +196,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
         <section className="card">
           <div className="card-head">
             <h2>
-              {m.batch.resultsTitle} {busy && <small>{m.batch.processing}</small>}
+              {m.batch.resultsTitle} {busy && <small>{m.common.processing}</small>}
             </h2>
             {done.length > 0 && (
               <button

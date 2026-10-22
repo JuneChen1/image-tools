@@ -10,7 +10,8 @@ export const zh = {
     clearAll: '清除全部',
     outputFormat: '輸出格式',
     quality: '品質',
-    avifSlowNote: 'AVIF 的編碼速度較慢，大張圖片可能需要數秒到數十秒，處理期間畫面可能暫時無回應。',
+    processing: '處理中…',
+    avifSlowNote: 'AVIF 的編碼速度較慢，大張圖片可能需要數秒到數十秒，請耐心等待。',
   },
   dropzone: {
     hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF）',
@@ -47,7 +48,6 @@ export const zh = {
       'PNG 是無損格式，品質滑桿對 PNG 無效；想大幅縮小檔案，請改輸出 WebP 或 JPEG，或限制最長邊。',
     convertJpegNote: 'JPEG 不支援透明，透明區域會填上上面選的顏色。',
     resultsTitle: '結果',
-    processing: '處理中…',
     total: (before: string, after: string) => `共 ${before} → ${after}`,
     saved: (percent: number) => `省下 ${percent}%`,
     grew: (percent: number) => `增加 ${percent}%`,

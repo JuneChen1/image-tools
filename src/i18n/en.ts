@@ -12,8 +12,8 @@ export const en: Messages = {
     clearAll: 'Clear all',
     outputFormat: 'Output format',
     quality: 'Quality',
-    avifSlowNote:
-      'AVIF encoding is slow. Large images can take several seconds or more, and the page may briefly stop responding.',
+    processing: 'Processing…',
+    avifSlowNote: 'AVIF encoding is slow. Large images can take several seconds or more.',
   },
   dropzone: {
     hint: 'Drop images here, or click to choose files (JPEG, PNG, WebP, AVIF supported)',
@@ -51,7 +51,6 @@ export const en: Messages = {
       'PNG is lossless, so the quality slider has no effect on it. To shrink files a lot, output WebP or JPEG, or limit the longest edge.',
     convertJpegNote: 'JPEG has no transparency. Transparent areas are filled with the color above.',
     resultsTitle: 'Results',
-    processing: 'Processing…',
     total: (before, after) => `Total ${before} → ${after}`,
     saved: (percent) => `saved ${percent}%`,
     grew: (percent) => `grew ${percent}%`,

@@ -9,17 +9,18 @@ import {
   downloadBlob,
   downloadZip,
   formatSize,
-  renderBlob,
   splitBounds,
   type Format,
 } from '../utils/image'
+import { processImage } from '../utils/processImage'
 
 /** X 一則貼文最多 4 張圖 */
 const COUNT_CHOICES = [2, 3, 4]
 
 interface Source {
   file: File
-  bitmap: ImageBitmap
+  width: number
+  height: number
   url: string
 }
 
@@ -39,19 +40,19 @@ export default function SplitTab() {
   const [quality, setQuality] = useState(92)
   const [parts, setParts] = useState<Part[]>([])
   const [error, setError] = useState<unknown>(null)
+  const [busy, setBusy] = useState(false)
   const sourceRef = useRef<Source | null>(null)
-
-  function release(s: Source | null) {
-    if (!s) return
-    s.bitmap.close()
-    URL.revokeObjectURL(s.url)
-  }
+  // 目前畫面上顯示的結果縮圖網址；新結果出來後才釋放，處理期間舊縮圖不會變成破圖
+  const partUrlsRef = useRef<string[]>([])
 
   async function handleFiles(files: File[]) {
     try {
+      // 只為了取得寬高；實際的切割與編碼在 Worker 內進行
       const bitmap = await createImageBitmap(files[0])
-      const next = { file: files[0], bitmap, url: URL.createObjectURL(files[0]) }
-      release(sourceRef.current)
+      const { width, height } = bitmap
+      bitmap.close()
+      const next = { file: files[0], width, height, url: URL.createObjectURL(files[0]) }
+      if (sourceRef.current) URL.revokeObjectURL(sourceRef.current.url)
       sourceRef.current = next
       setSource(next)
       setError(null)
@@ -60,48 +61,64 @@ export default function SplitTab() {
     }
   }
 
-  useEffect(() => () => release(sourceRef.current), [])
+  useEffect(
+    () => () => {
+      if (sourceRef.current) URL.revokeObjectURL(sourceRef.current.url)
+      partUrlsRef.current.forEach((u) => URL.revokeObjectURL(u))
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!source) return
-    const { file, bitmap } = source
-    let cancelled = false
+    const { file, width, height } = source
+    const controller = new AbortController()
     const urls: string[] = []
 
     ;(async () => {
+      setBusy(true)
       try {
-        if (bitmap.width < count) throw new ImageError('tooNarrow', count)
-        const bounds = splitBounds(bitmap.width, count)
-        const base = baseName(file.name)
-        const next: Part[] = []
-        for (let i = 0; i < count; i++) {
-          const { blob, width, height } = await renderBlob(bitmap, {
-            crop: { x: bounds[i], y: 0, w: bounds[i + 1] - bounds[i], h: bitmap.height },
+        if (width < count) throw new ImageError('tooNarrow', count)
+        const bounds = splitBounds(width, count)
+        const results = await processImage(
+          file,
+          Array.from({ length: count }, (_, i) => ({
+            crop: { x: bounds[i], y: 0, w: bounds[i + 1] - bounds[i], h: height },
             format,
             quality: quality / 100,
             background: '#ffffff',
-          })
-          const url = URL.createObjectURL(blob)
+          })),
+          controller.signal,
+        )
+        const base = baseName(file.name)
+        const next: Part[] = results.map((r, i) => {
+          const url = URL.createObjectURL(r.blob)
           urls.push(url)
-          next.push({
+          return {
             name: `${base}_${i + 1}.${FORMAT_EXT[format]}`,
-            blob,
+            blob: r.blob,
             url,
-            width,
-            height,
-          })
-        }
-        if (!cancelled) {
-          setParts(next)
-          setError(null)
-        }
+            width: r.width,
+            height: r.height,
+          }
+        })
+        // 新結果接手顯示後，才釋放舊的縮圖網址
+        const previous = partUrlsRef.current
+        partUrlsRef.current = [...urls]
+        urls.length = 0
+        previous.forEach((u) => URL.revokeObjectURL(u))
+        setParts(next)
+        setError(null)
+        setBusy(false)
       } catch (e) {
-        if (!cancelled) setError(e)
+        if (controller.signal.aborted) return
+        setError(e)
+        setBusy(false)
       }
     })()
 
     return () => {
-      cancelled = true
+      controller.abort()
       urls.forEach((u) => URL.revokeObjectURL(u))
     }
   }, [source, count, format, quality])
@@ -126,7 +143,7 @@ export default function SplitTab() {
               ))}
             </div>
             <p className="hint num">
-              {source.file.name}・{source.bitmap.width} × {source.bitmap.height}・
+              {source.file.name}・{source.width} × {source.height}・
               {formatSize(source.file.size)}
             </p>
           </section>
@@ -173,6 +190,7 @@ export default function SplitTab() {
               )}
             </div>
             {format === 'image/avif' && <p className="hint">{m.common.avifSlowNote}</p>}
+            {busy && <p className="hint">{m.common.processing}</p>}
           </section>
 
           {parts.length === count && (

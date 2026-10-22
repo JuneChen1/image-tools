@@ -56,6 +56,36 @@ export interface RenderResult {
   height: number
 }
 
+type Context2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
+
+interface Surface {
+  ctx: Context2D | null
+  toBlob: (type: string, quality: number) => Promise<Blob | null>
+}
+
+/** 優先用 OffscreenCanvas（Worker 裡只能用它），不支援時退回一般 canvas */
+function createSurface(width: number, height: number): Surface {
+  if (typeof OffscreenCanvas !== 'undefined') {
+    try {
+      const canvas = new OffscreenCanvas(width, height)
+      return {
+        ctx: canvas.getContext('2d'),
+        toBlob: (type, quality) => canvas.convertToBlob({ type, quality }),
+      }
+    } catch {
+      return { ctx: null, toBlob: async () => null }
+    }
+  }
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  return {
+    ctx: canvas.getContext('2d'),
+    toBlob: (type, quality) => new Promise((resolve) => canvas.toBlob(resolve, type, quality)),
+  }
+}
+
+/** 這個函式不使用 document，主執行緒與 Web Worker 都能呼叫 */
 export async function renderBlob(
   bitmap: ImageBitmap,
   options: RenderOptions,
@@ -67,10 +97,7 @@ export async function renderBlob(
   const width = Math.max(1, Math.round(crop.w * scale))
   const height = Math.max(1, Math.round(crop.h * scale))
 
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d')
+  const { ctx, toBlob } = createSurface(width, height)
   if (!ctx) throw new ImageError('canvasTooLarge')
 
   if (options.format === 'image/jpeg') {
@@ -93,9 +120,7 @@ export async function renderBlob(
     }
   }
 
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, options.format, options.quality),
-  )
+  const blob = await toBlob(options.format, options.quality).catch(() => null)
   if (!blob) throw new ImageError('encodeFailed')
   // 不支援的格式會被瀏覽器悄悄換成 PNG，這裡要擋下來
   if (blob.type !== options.format) {
