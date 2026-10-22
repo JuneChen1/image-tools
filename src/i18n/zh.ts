@@ -44,10 +44,10 @@ export const zh = {
     keepFormat: '維持原格式',
     maxEdgeLabel: '最長邊上限',
     unlimited: '不限制',
-    backgroundLabel: '透明處填色',
+    backgroundLabel: '背景填色',
     compressPngNote:
       'PNG 是無損格式，品質滑桿對 PNG 無效；想大幅縮小檔案，請改輸出 WebP 或 JPEG，或限制最長邊。',
-    convertJpegNote: 'JPEG 不支援透明，透明區域會填上上面選的顏色。',
+    convertJpegNote: 'JPEG 不支援透明背景。若圖片包含去背（透明）區域，將會用這個顏色填滿（一般照片不受影響）。',
     resultsTitle: '結果',
     total: (before: string, after: string) => `共 ${before} → ${after}`,
     saved: (percent: number) => `省下 ${percent}%`,

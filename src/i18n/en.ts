@@ -47,10 +47,11 @@ export const en: Messages = {
     keepFormat: 'Keep original format',
     maxEdgeLabel: 'Max longest edge',
     unlimited: 'No limit',
-    backgroundLabel: 'Fill transparent areas',
+    backgroundLabel: 'Background color',
     compressPngNote:
       'PNG is lossless, so the quality slider has no effect on it. To shrink files a lot, output WebP or JPEG, or limit the longest edge.',
-    convertJpegNote: 'JPEG has no transparency. Transparent areas are filled with the color above.',
+    convertJpegNote:
+      'JPEG does not support transparent backgrounds. If the image has cut-out (transparent) areas, they will be filled with this color (regular photos are not affected).',
     resultsTitle: 'Results',
     total: (before, after) => `Total ${before} → ${after}`,
     saved: (percent) => `saved ${percent}%`,
