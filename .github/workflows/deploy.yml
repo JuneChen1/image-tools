@@ -38,9 +38,11 @@ jobs:
 
       # 內容是：型別檢查 + 建置 + 產生 /zh/、/en/ 頁面與 404.html
       - run: npm run build
-        # 之後接 Google Analytics 時，在這裡帶入衡量 ID（公開識別碼，不是機密）：
-        # env:
-        #   VITE_GA_ID: ${{ vars.VITE_GA_ID }}
+        env:
+          # Google Analytics 的衡量 ID（公開識別碼，不是機密）。
+          # 要換成別的 ID，到 repo 的 Settings → Secrets and variables → Actions → Variables 新增 VITE_GA_ID；沒設就用右邊的預設值。
+          # 網站上要等使用者按「同意」才會載入 GA（見 src/analytics.ts）
+          VITE_GA_ID: ${{ vars.VITE_GA_ID || 'G-EJQ7YWC4GN' }}
 
       - name: Upload site
         if: github.event_name != 'pull_request'

@@ -15,6 +15,7 @@ import {
   type FormatChoice,
 } from '../utils/image'
 import { processImage } from '../utils/processImage'
+import { createOnce, trackError, trackFilesAdded, trackSaveResult } from '../analyticsEvents'
 
 type Mode = 'compress' | 'convert'
 
@@ -55,6 +56,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
   const [busy, setBusy] = useState(false)
   // 目前畫面上顯示的結果縮圖網址；新結果出來後才釋放，處理期間舊縮圖不會變成破圖
   const resultUrlsRef = useRef<string[]>([])
+  const reportOnce = useRef(createOnce())
 
   const { zipName, suffix } = OUTPUT[mode]
 
@@ -83,11 +85,12 @@ export default function BatchTab({ mode }: { mode: Mode }) {
           next.push({ file, name, blob, url, width, height })
         } catch (e) {
           if (signal.aborted) return
-          next.push({
-            file,
-            name,
-            error: e instanceof ImageError ? e : new ImageError('readFailed'),
-          })
+          const failure = e instanceof ImageError ? e : new ImageError('readFailed')
+          next.push({ file, name, error: failure })
+          // 改設定會把整個清單重新處理，同一個檔案的同一個錯誤只回報一次
+          if (reportOnce.current(`${file.name}|${file.size}|${file.lastModified}|${failure.code}|${format}`)) {
+            trackError(mode, failure, format)
+          }
         }
       }
       // 新結果接手顯示後，才釋放舊的縮圖網址
@@ -104,7 +107,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
       clearTimeout(timer)
       urls.forEach((u) => URL.revokeObjectURL(u))
     }
-  }, [files, choice, quality, maxEdge, background, suffix])
+  }, [files, choice, quality, maxEdge, background, suffix, mode])
 
   const done = results.filter((r) => r.blob)
   const totalBefore = done.reduce((sum, r) => sum + r.file.size, 0)
@@ -119,6 +122,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
   return (
     <div className="panel">
       <Dropzone
+        tool={mode}
         multiple
         maxFiles={MAX_FILES}
         currentCount={files.length}
@@ -127,7 +131,10 @@ export default function BatchTab({ mode }: { mode: Mode }) {
             ? m.batch.compressDropLabel(MAX_FILES)
             : m.batch.convertDropLabel(MAX_FILES)
         }
-        onFiles={(added) => setFiles((old) => [...old, ...added])}
+        onFiles={(added) => {
+          trackFilesAdded(mode, added)
+          setFiles((old) => [...old, ...added])
+        }}
       />
 
       {files.length > 0 && (
@@ -212,7 +219,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
               </h2>
               {done.length > 0 && <ShareHint items={doneItems} />}
             </div>
-            {done.length > 0 && <ResultActions items={doneItems} zipName={zipName} />}
+            {done.length > 0 && <ResultActions tool={mode} items={doneItems} zipName={zipName} />}
           </div>
 
           {mode === 'compress' && done.length > 0 && (
@@ -250,7 +257,12 @@ export default function BatchTab({ mode }: { mode: Mode }) {
                     )}
                   </div>
                   {r.blob && (
-                    <button onClick={() => downloadBlob(r.blob!, r.name)}>
+                    <button
+                      onClick={() => {
+                        trackSaveResult({ tool: mode, method: 'single', blobs: [r.blob!] })
+                        downloadBlob(r.blob!, r.name)
+                      }}
+                    >
                       {m.common.download}
                     </button>
                   )}

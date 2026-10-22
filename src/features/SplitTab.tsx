@@ -14,6 +14,7 @@ import {
   type Format,
 } from '../utils/image'
 import { probeImage, processImage } from '../utils/processImage'
+import { createOnce, trackError, trackFilesAdded, trackSaveResult } from '../analyticsEvents'
 
 /** X 一則貼文最多 4 張圖 */
 const COUNT_CHOICES = [2, 3, 4]
@@ -47,9 +48,11 @@ export default function SplitTab() {
   const partUrlsRef = useRef<string[]>([])
   // 連續選檔時，只採用最後一次選的結果
   const probeTicketRef = useRef(0)
+  const reportOnce = useRef(createOnce())
 
   async function handleFiles(files: File[]) {
     const ticket = ++probeTicketRef.current
+    trackFilesAdded('split', files)
     try {
       // 取得寬高；HEIC 等瀏覽器無法直接顯示的格式會另外附上預覽圖。解碼在 Worker 內進行
       const info = await probeImage(files[0])
@@ -66,7 +69,9 @@ export default function SplitTab() {
       setError(null)
     } catch (e) {
       if (ticket !== probeTicketRef.current) return
-      setError(e instanceof ImageError ? e : new ImageError('readFailed'))
+      const failure = e instanceof ImageError ? e : new ImageError('readFailed')
+      setError(failure)
+      trackError('split', failure, '')
     }
   }
 
@@ -123,6 +128,11 @@ export default function SplitTab() {
         if (controller.signal.aborted) return
         setError(e)
         setBusy(false)
+        // 改設定會重新處理，同一個檔案的同一個錯誤只回報一次
+        const code = e instanceof ImageError ? e.code : 'unknown'
+        if (reportOnce.current(`${file.name}|${file.size}|${file.lastModified}|${code}|${format}|${count}`)) {
+          trackError('split', e, format)
+        }
       }
     })()
 
@@ -136,7 +146,7 @@ export default function SplitTab() {
 
   return (
     <div className="panel">
-      <Dropzone label={m.split.dropLabel} onFiles={handleFiles} />
+      <Dropzone tool="split" label={m.split.dropLabel} onFiles={handleFiles} />
       {error != null && <p className="error">{describeError(error, m)}</p>}
 
       {source && (
@@ -212,6 +222,8 @@ export default function SplitTab() {
                   <ShareHint items={partItems} />
                 </div>
                 <ResultActions
+                  tool="split"
+                  splitParts={count}
                   items={partItems}
                   zipName={`${baseName(source.file.name)}_split.zip`}
                 />
@@ -227,7 +239,12 @@ export default function SplitTab() {
                       <span>
                         {p.width} × {p.height}・{formatSize(p.blob.size)}
                       </span>
-                      <button onClick={() => downloadBlob(p.blob, p.name)}>
+                      <button
+                        onClick={() => {
+                          trackSaveResult({ tool: 'split', method: 'single', blobs: [p.blob], splitParts: count })
+                          downloadBlob(p.blob, p.name)
+                        }}
+                      >
                         {m.common.download}
                       </button>
                     </figcaption>

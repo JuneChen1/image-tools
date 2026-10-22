@@ -6,6 +6,13 @@ export const en: Messages = {
   langSwitchLabel: 'Language',
   listSep: ', ',
   tabs: { split: 'Split', compress: 'Compress', convert: 'Convert' },
+  consent: {
+    title: 'Analytics settings',
+    text: 'This site uses Google Analytics to count visits and see which features are used, to improve the site. Your images and file names are never collected, and images are still processed only in your browser.',
+    accept: 'Accept',
+    deny: 'Decline',
+    settings: 'Analytics settings',
+  },
   common: {
     download: 'Download',
     downloadAll: 'Download all (ZIP)',

@@ -1,9 +1,12 @@
 import { useRef, useState } from 'react'
+import { trackRejections, type Tool } from '../analyticsEvents'
 import { useI18n } from '../i18n'
 import { MAX_FILE_MB } from '../utils/limits'
 import { ACCEPT_ATTR, selectFiles } from '../utils/selectFiles'
 
 interface Props {
+  /** 哪個工具的上傳區，回報統計用 */
+  tool: Tool
   multiple?: boolean
   /** 多選時的總張數上限（含已加入的），不設就不限制 */
   maxFiles?: number
@@ -14,6 +17,7 @@ interface Props {
 }
 
 export default function Dropzone({
+  tool,
   multiple = false,
   maxFiles,
   currentCount = 0,
@@ -29,7 +33,9 @@ export default function Dropzone({
   const [skipped, setSkipped] = useState(0)
 
   function pick(list: FileList | null) {
-    const result = selectFiles(Array.from(list ?? []), { multiple, maxFiles, currentCount })
+    const dropped = Array.from(list ?? [])
+    const result = selectFiles(dropped, { multiple, maxFiles, currentCount })
+    trackRejections(tool, result, dropped.length)
     setRejected(result.unsupported)
     setOversized(result.oversized)
     setTooMany(result.tooMany)

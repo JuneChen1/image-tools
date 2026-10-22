@@ -198,6 +198,57 @@ button.primary:hover {
   margin-left: auto;
 }
 
+/* 頁尾：統計設定（只在可用 GA 的環境顯示），讓使用者隨時能重新選擇 */
+.app-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-lg);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.app-foot button {
+  color: var(--color-fg-soft);
+  font-size: 13px;
+}
+
+/* 同意橫幅：固定在畫面底部，一條細線與留白，沒有陰影 */
+.consent {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  border-top: 1px solid var(--color-fg);
+  background: var(--color-bg);
+}
+
+.consent-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.consent-inner p {
+  flex: 1 1 360px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.consent-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-md);
+  margin-left: auto;
+}
+
 /* 沒有分享按鈕時（只剩下載），下載按鈕也要靠右 */
 .card-actions-row .primary {
   margin-left: auto;
@@ -563,6 +614,15 @@ input[type='range']:focus-visible::-moz-range-thumb {
 
   .dropzone {
     padding: 32px var(--space-sm);
+  }
+
+  .consent-inner {
+    padding: var(--space-sm) 24px;
+  }
+
+  .consent-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   /* 手機：標題與說明獨占一整行，接著按鈕列獨占一整行，分享靠左、下載全部 (ZIP) 靠右，右邊緣與下方圖片對齊 */

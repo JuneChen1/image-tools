@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import AnalyticsConsent from './components/AnalyticsConsent'
 import BatchTab from './features/BatchTab'
 import SplitTab from './features/SplitTab'
 import { useI18n, type Lang } from './i18n'
@@ -59,6 +60,8 @@ function App() {
       <div hidden={tab !== 'convert'}>
         <BatchTab mode="convert" />
       </div>
+
+      <AnalyticsConsent />
     </main>
   )
 }

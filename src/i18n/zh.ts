@@ -4,6 +4,13 @@ export const zh = {
   langSwitchLabel: '語言',
   listSep: '、',
   tabs: { split: '切圖', compress: '圖片壓縮', convert: '圖片轉檔' },
+  consent: {
+    title: '統計設定',
+    text: '本站使用 Google Analytics 統計瀏覽次數與功能使用情況，用來改善網站。不會收集你的圖片或檔名，圖片仍然只在你的瀏覽器內處理。',
+    accept: '同意',
+    deny: '拒絕',
+    settings: '統計設定',
+  },
   common: {
     download: '下載',
     downloadAll: '下載全部 (ZIP)',
