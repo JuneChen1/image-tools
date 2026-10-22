@@ -14,6 +14,19 @@ export const FORMAT_EXT: Record<Format, string> = {
   'image/avif': 'avif',
 }
 
+/** 'keep' 代表「維持原格式」 */
+export type FormatChoice = Format | 'keep'
+
+/**
+ * 決定輸出格式。「維持原格式」時：PNG、WebP、AVIF 維持；
+ * 其他（JPEG、HEIC、瀏覽器沒回報類型的檔案）一律輸出 JPEG
+ */
+export function resolveOutputFormat(fileType: string, choice: FormatChoice): Format {
+  if (choice !== 'keep') return choice
+  const keepable: string[] = ['image/png', 'image/webp', 'image/avif']
+  return keepable.includes(fileType) ? (fileType as Format) : 'image/jpeg'
+}
+
 export type ImageErrorCode =
   | 'canvasTooLarge'
   | 'encodeFailed'

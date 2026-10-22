@@ -1,13 +1,7 @@
 import { useRef, useState } from 'react'
 import { useI18n } from '../i18n'
-import { isHeicFile } from '../utils/decode'
-import { MAX_FILE_BYTES, MAX_FILE_MB } from '../utils/limits'
-
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
-// HEIC 的 type 常被回報成空字串，所以另外用副檔名放行
-const ACCEPT_ATTR = [...ACCEPTED_TYPES, 'image/heic', 'image/heif', '.heic', '.heif'].join(',')
-
-const isAccepted = (file: File) => ACCEPTED_TYPES.includes(file.type) || isHeicFile(file)
+import { MAX_FILE_MB } from '../utils/limits'
+import { ACCEPT_ATTR, selectFiles } from '../utils/selectFiles'
 
 interface Props {
   multiple?: boolean
@@ -35,23 +29,12 @@ export default function Dropzone({
   const [skipped, setSkipped] = useState(0)
 
   function pick(list: FileList | null) {
-    const all = Array.from(list ?? [])
-    const accepted = all.filter(isAccepted)
-    // 檔案太大的直接略過並提示；像素太多的要解碼後才知道，在處理階段另外擋
-    const files = accepted.filter((f) => f.size <= MAX_FILE_BYTES)
-    setRejected(all.filter((f) => !isAccepted(f)).map((f) => f.name))
-    setOversized(accepted.filter((f) => f.size > MAX_FILE_BYTES).map((f) => f.name))
-
-    // 只收一張的上傳區（切圖）：選了多張就整批不處理並提示，不要悄悄只挑第一張
-    const exceeds = !multiple && files.length > 1
-    setTooMany(exceeds)
-    if (exceeds) return
-
-    // 多選的上傳區：依選取順序收到上限為止，超過的略過並提示
-    const room = multiple && maxFiles !== undefined ? Math.max(0, maxFiles - currentCount) : files.length
-    const taken = files.slice(0, room)
-    setSkipped(files.length - taken.length)
-    if (taken.length > 0) onFiles(taken)
+    const result = selectFiles(Array.from(list ?? []), { multiple, maxFiles, currentCount })
+    setRejected(result.unsupported)
+    setOversized(result.oversized)
+    setTooMany(result.tooMany)
+    setSkipped(result.skipped)
+    if (result.taken.length > 0) onFiles(result.taken)
   }
 
   return (

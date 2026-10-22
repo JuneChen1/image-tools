@@ -12,7 +12,7 @@ export interface ProbeResult {
 }
 
 /** 瀏覽器常把 .heic 的 type 回報成空字串，所以副檔名也要看 */
-export function isHeicFile(file: File): boolean {
+export function isHeicFile(file: Pick<File, 'name' | 'type'>): boolean {
   return /^image\/hei[cf]/.test(file.type) || /\.(heic|heif)$/i.test(file.name)
 }
 

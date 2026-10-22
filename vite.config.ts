@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,4 +10,6 @@ export default defineConfig({
   worker: { format: 'es' },
   // wasm 編碼器要用 new URL(..., import.meta.url) 找檔案，不能被預先打包
   optimizeDeps: { exclude: ['@jsquash/avif'] },
+  // 只測不需要瀏覽器就能驗證的純邏輯；圖片的實際解碼、編碼要靠瀏覽器，不在這裡
+  test: { environment: 'node', include: ['src/**/*.test.ts'] },
 })

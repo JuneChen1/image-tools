@@ -9,12 +9,13 @@ import {
   downloadBlob,
   downloadZip,
   formatSize,
+  resolveOutputFormat,
   type Format,
+  type FormatChoice,
 } from '../utils/image'
 import { processImage } from '../utils/processImage'
 
 type Mode = 'compress' | 'convert'
-type FormatChoice = Format | 'keep'
 
 interface Result {
   file: File
@@ -39,12 +40,6 @@ const MAX_FILES = 10
 const OUTPUT = {
   compress: { zipName: 'compressed.zip', suffix: '_compressed' },
   convert: { zipName: 'converted.zip', suffix: '' },
-}
-
-function resolveFormat(file: File, choice: FormatChoice): Format {
-  if (choice !== 'keep') return choice
-  const keepable: string[] = ['image/png', 'image/webp', 'image/avif']
-  return keepable.includes(file.type) ? (file.type as Format) : 'image/jpeg'
 }
 
 export default function BatchTab({ mode }: { mode: Mode }) {
@@ -73,7 +68,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
       setBusy(true)
       const next: Result[] = []
       for (const file of files) {
-        const format = resolveFormat(file, choice)
+        const format = resolveOutputFormat(file.type, choice)
         const name = `${baseName(file.name)}${suffix}.${FORMAT_EXT[format]}`
         try {
           const [{ blob, width, height }] = await processImage(
