@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { canShareFiles, shareFiles, toFiles } from './share'
+import { canShareFiles, isTouchDevice, shareFiles, toFiles } from './share'
 
 const file = (name: string) => new File(['x'], name, { type: 'image/png' })
 
@@ -63,6 +63,25 @@ describe('canShareFiles', () => {
       },
     })
     expect(canShareFiles([file('a.png')])).toBe(false)
+  })
+})
+
+describe('isTouchDevice', () => {
+  it('沒有 matchMedia（非瀏覽器環境）時是 false', () => {
+    vi.stubGlobal('matchMedia', undefined)
+    expect(isTouchDevice()).toBe(false)
+  })
+
+  it('主要輸入是手指（pointer: coarse）時是 true，並且問的是這個條件', () => {
+    const matchMedia = vi.fn().mockReturnValue({ matches: true })
+    vi.stubGlobal('matchMedia', matchMedia)
+    expect(isTouchDevice()).toBe(true)
+    expect(matchMedia).toHaveBeenCalledWith('(pointer: coarse)')
+  })
+
+  it('用滑鼠的桌機是 false', () => {
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }))
+    expect(isTouchDevice()).toBe(false)
   })
 })
 

@@ -28,6 +28,11 @@ export function canShareFiles(files: File[]): boolean {
   }
 }
 
+/** 主要輸入方式是手指（手機、平板）。桌機用滑鼠，不需要「手機請點這個」的說明 */
+export function isTouchDevice(): boolean {
+  return typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
+}
+
 export type ShareResult = 'shared' | 'cancelled'
 
 /**

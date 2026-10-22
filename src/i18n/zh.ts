@@ -9,6 +9,7 @@ export const zh = {
     downloadAll: '下載全部 (ZIP)',
     share: '分享 / 儲存到相簿',
     shareFailed: '無法開啟分享選單，請改用「下載」。',
+    shareHint: '手機請點「分享 / 儲存到相簿」存進相簿。',
     clearAll: '清除全部',
     outputFormat: '輸出格式',
     quality: '品質',

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
 import ResultActions from '../components/ResultActions'
+import ShareHint from '../components/ShareHint'
 import { describeError, useI18n } from '../i18n'
 import {
   FORMAT_EXT,
@@ -112,6 +113,8 @@ export default function BatchTab({ mode }: { mode: Mode }) {
   const showBackground = mode === 'convert' && choice === 'image/jpeg'
   const totalPercent = totalBefore > 0 ? Math.abs(Math.round((1 - totalAfter / totalBefore) * 100)) : 0
 
+  const doneItems = done.map((r) => ({ name: r.name, blob: r.blob! }))
+
   return (
     <div className="panel">
       <Dropzone
@@ -202,15 +205,13 @@ export default function BatchTab({ mode }: { mode: Mode }) {
       {results.length > 0 && (
         <section className="card">
           <div className="card-head">
-            <h2>
-              {m.batch.resultsTitle} {busy && <small>{m.common.processing}</small>}
-            </h2>
-            {done.length > 0 && (
-              <ResultActions
-                items={done.map((r) => ({ name: r.name, blob: r.blob! }))}
-                zipName={zipName}
-              />
-            )}
+            <div className="card-head-text">
+              <h2>
+                {m.batch.resultsTitle} {busy && <small>{m.common.processing}</small>}
+              </h2>
+              {done.length > 0 && <ShareHint items={doneItems} />}
+            </div>
+            {done.length > 0 && <ResultActions items={doneItems} zipName={zipName} />}
           </div>
 
           {mode === 'compress' && done.length > 0 && (

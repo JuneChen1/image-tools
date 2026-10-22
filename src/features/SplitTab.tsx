@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
 import ResultActions from '../components/ResultActions'
+import ShareHint from '../components/ShareHint'
 import { describeError, useI18n } from '../i18n'
 import {
   FORMAT_EXT,
@@ -131,6 +132,8 @@ export default function SplitTab() {
     }
   }, [source, count, format, quality])
 
+  const partItems = parts.map((p) => ({ name: p.name, blob: p.blob }))
+
   return (
     <div className="panel">
       <Dropzone label={m.split.dropLabel} onFiles={handleFiles} />
@@ -204,9 +207,12 @@ export default function SplitTab() {
           {parts.length === count && (
             <section className="card">
               <div className="card-head">
-                <h2>{m.split.resultTitle}</h2>
+                <div className="card-head-text">
+                  <h2>{m.split.resultTitle}</h2>
+                  <ShareHint items={partItems} />
+                </div>
                 <ResultActions
-                  items={parts.map((p) => ({ name: p.name, blob: p.blob }))}
+                  items={partItems}
                   zipName={`${baseName(source.file.name)}_split.zip`}
                 />
               </div>

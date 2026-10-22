@@ -173,11 +173,34 @@ button.primary:hover {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-md);
+  /* 上下（換行時）12px，左右 32px */
+  gap: 12px var(--space-md);
 }
 
 .card-actions .error {
   text-align: right;
+}
+
+/*
+ * 結果標題 + 觸控裝置上的說明疊在左邊，按鈕在右邊同一排（寬版面右側不留白）。
+ * 左邊至少要有 240px 寬，不夠時按鈕才換到下一行（手機上則是標題 → 說明 → 按鈕）
+ */
+.card-head-text {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.card-head-text .hint {
+  margin: var(--space-xs) 0 0;
+}
+
+.card-head .card-actions {
+  margin-left: auto;
+}
+
+/* 沒有分享按鈕時（只剩下載），下載按鈕也要靠右 */
+.card-actions-row .primary {
+  margin-left: auto;
 }
 
 .card-head h2 {
@@ -540,6 +563,30 @@ input[type='range']:focus-visible::-moz-range-thumb {
 
   .dropzone {
     padding: 32px var(--space-sm);
+  }
+
+  /* 手機：標題與說明獨占一整行，接著按鈕列獨占一整行，分享靠左、下載全部 (ZIP) 靠右，右邊緣與下方圖片對齊 */
+  .card-head-text {
+    flex-basis: 100%;
+  }
+
+  .card-actions {
+    flex: 1 1 100%;
+    align-items: stretch;
+  }
+
+  .card-actions-row {
+    justify-content: space-between;
+    column-gap: var(--space-sm);
+  }
+
+  /* 按鈕兩側留白縮小，讓分享與下載全部在常見的手機寬度能放進同一行 */
+  .card-actions-row .primary {
+    padding: 12px 16px;
+  }
+
+  .card-actions .error {
+    text-align: left;
   }
 
   .tabs {
