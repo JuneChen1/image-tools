@@ -1,0 +1,74 @@
+import type { Messages } from './zh'
+
+export const ja: Messages = {
+  htmlLang: 'ja',
+  siteTitle: '画像ツールボックス',
+  langSwitchLabel: '言語',
+  listSep: '、',
+  tabs: { split: '画像分割', compress: '画像圧縮', convert: '画像変換' },
+  consent: {
+    title: 'アクセス解析の設定',
+    text: 'このサイトでは、サイトの改善のために Google Analytics で閲覧数や機能の利用状況を集計しています。画像やファイル名は収集されず、画像はこれまでどおりブラウザ内だけで処理されます。',
+    accept: '同意する',
+    deny: '同意しない',
+    settings: 'アクセス解析の設定',
+  },
+  common: {
+    download: 'ダウンロード',
+    downloadAll: 'すべてダウンロード (ZIP)',
+    share: '共有 / 写真に保存',
+    shareFailed: '共有メニューを開けませんでした。「ダウンロード」をご利用ください。',
+    shareHint: 'スマホでは「共有 / 写真に保存」をタップして、写真アプリに保存してください。',
+    clearAll: 'すべてクリア',
+    outputFormat: '出力形式',
+    quality: '画質',
+    processing: '処理中…',
+    avifSlowNote: 'AVIF のエンコードは時間がかかります。大きな画像では数秒から数十秒かかることがあります。',
+  },
+  dropzone: {
+    hint: 'ここに画像をドラッグ＆ドロップ、またはクリックしてファイルを選択（JPEG、PNG、WebP、AVIF、HEIC に対応）',
+    singleOnly: '一度に処理できる画像は 1 枚だけです。1 枚だけ選んでください。',
+    limit: (max, skipped) => `一度に処理できるのは最大 ${max} 枚です。${skipped} 枚をスキップしました。`,
+    tooBig: (count, mb, names) =>
+      `サイズが大きすぎるファイルを ${count} 件スキップしました（1 ファイルの上限 ${mb} MB）：${names}`,
+    rejected: (count, names) => `未対応のファイルを ${count} 件スキップしました：${names}`,
+  },
+  errors: {
+    generic: '処理に失敗しました',
+    canvasTooLarge: '画像が大きすぎて、ブラウザで処理できません',
+    encodeFailed: 'ブラウザが画像を出力できませんでした',
+    formatUnsupported: (format) => `このブラウザは ${format} の出力に対応していません`,
+    readFailed: 'この画像を読み込めませんでした。ファイル形式が正しいかご確認ください。',
+    tooNarrow: (count) => `画像の幅が小さすぎて、${count} 枚に分割できません`,
+    tooLarge: (megapixels) => `画像の画素数が多すぎるため（上限 ${megapixels * 100} 万画素）、スキップしました`,
+  },
+  split: {
+    dropLabel: '分割する画像を選択',
+    previewTitle: '分割プレビュー',
+    originalAlt: '元の画像',
+    settingsTitle: '分割設定',
+    countLabel: '分割数',
+    countOption: (count) => `${count} 枚`,
+    pngRecommended: '（可逆圧縮・おすすめ）',
+    resultTitle: '分割結果',
+    numbering: (count) =>
+      `左から順に 1～${count} の番号が付きます。X に投稿して 1 枚の大きな画像に見せるには、この順番でアップロードしてください。`,
+  },
+  batch: {
+    compressDropLabel: (max) => `圧縮する画像を選択（複数選択可、最大 ${max} 枚）`,
+    convertDropLabel: (max) => `変換する画像を選択（複数選択可、最大 ${max} 枚）`,
+    settingsTitle: '設定',
+    keepFormat: '元の形式を維持',
+    maxEdgeLabel: '長辺の上限',
+    unlimited: '制限なし',
+    backgroundLabel: '背景色',
+    compressPngNote:
+      'PNG は可逆圧縮のため、画質スライダーは PNG には効きません。ファイルサイズを小さくしたい場合は、WebP または JPEG で出力するか、長辺を制限してください。',
+    convertJpegNote:
+      'JPEG は透過背景に対応していません。透過部分がある場合は指定した背景色で塗りつぶされます（透過がない画像には影響ありません）。',
+    resultsTitle: '結果',
+    total: (before, after) => `合計 ${before} → ${after}`,
+    saved: (percent) => `${percent}% 削減`,
+    grew: (percent) => `${percent}% 増加`,
+  },
+}

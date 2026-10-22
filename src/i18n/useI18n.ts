@@ -1,8 +1,9 @@
 import { createContext, useContext } from 'react'
 import { FORMAT_LABEL, ImageError } from '../utils/image'
+import type { Lang } from './lang'
 import type { Messages } from './zh'
 
-export type Lang = 'zh' | 'en'
+export type { Lang }
 
 export interface I18n {
   lang: Lang

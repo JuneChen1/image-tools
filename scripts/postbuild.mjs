@@ -1,4 +1,4 @@
-// GitHub Pages 沒有 SPA fallback，直接開 /zh/、/en/ 會 404。
+// GitHub Pages 沒有 SPA fallback，直接開 /zh/、/en/、/ja/ 會 404。
 // 建置後為每個語言複製一份 index.html，並換上對應的 lang 與標題。
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 const LANGS = {
   zh: { htmlLang: 'zh-Hant', title: '圖片工具箱' },
   en: { htmlLang: 'en', title: 'Image Toolbox' },
+  ja: { htmlLang: 'ja', title: '画像ツールボックス' },
 }
 
 const html = readFileSync('dist/index.html', 'utf8')

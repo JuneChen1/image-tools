@@ -36,7 +36,7 @@ jobs:
 
       - run: npm test
 
-      # 內容是：型別檢查 + 建置 + 產生 /zh/、/en/ 頁面與 404.html
+      # 內容是：型別檢查 + 建置 + 產生 /zh/、/en/、/ja/ 頁面與 404.html
       - run: npm run build
         env:
           # Google Analytics 的衡量 ID（公開識別碼，不是機密）。

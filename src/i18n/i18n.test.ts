@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ImageError, type ImageErrorCode } from '../utils/image'
 import { en } from './en'
+import { ja } from './ja'
 import { describeError } from './useI18n'
 import { zh } from './zh'
 
@@ -15,14 +16,20 @@ function leaves(tree: Tree, prefix = ''): [string, unknown][] {
   )
 }
 
-describe('中英文字典', () => {
-  it('兩邊的欄位完全一致（沒有漏翻、沒有多出來的）', () => {
-    expect(leaves(en).map(([path]) => path)).toEqual(leaves(zh).map(([path]) => path))
+describe('中、英、日字典', () => {
+  it.each([
+    ['en', en],
+    ['ja', ja],
+  ])('%s 與中文的欄位完全一致（沒有漏翻、沒有多出來的）', (_name, messages) => {
+    expect(leaves(messages).map(([path]) => path)).toEqual(leaves(zh).map(([path]) => path))
   })
 
-  it('同一個欄位在兩邊的型態相同，函式的參數個數也相同', () => {
+  it.each([
+    ['en', en],
+    ['ja', ja],
+  ])('%s 的每個欄位型態與中文相同，函式的參數個數也相同', (_name, messages) => {
     const shape = (value: unknown) => (typeof value === 'function' ? `fn(${value.length})` : typeof value)
-    expect(leaves(en).map(([path, value]) => [path, shape(value)])).toEqual(
+    expect(leaves(messages).map(([path, value]) => [path, shape(value)])).toEqual(
       leaves(zh).map(([path, value]) => [path, shape(value)]),
     )
   })
@@ -30,6 +37,7 @@ describe('中英文字典', () => {
   it.each([
     ['zh', zh],
     ['en', en],
+    ['ja', ja],
   ])('%s：每個字串都不是空的，每個函式都回傳非空字串', (_name, messages) => {
     for (const [path, value] of leaves(messages)) {
       if (typeof value === 'function') {
@@ -46,6 +54,24 @@ describe('中英文字典', () => {
   it('語言標記', () => {
     expect(zh.htmlLang).toBe('zh-Hant')
     expect(en.htmlLang).toBe('en')
+    expect(ja.htmlLang).toBe('ja')
+  })
+})
+
+describe('日文（使用者指定的文字）', () => {
+  it('分頁名稱：圖片分割用「画像分割」', () => {
+    expect(ja.tabs.split).toBe('画像分割')
+    expect(ja.tabs.compress).toBe('画像圧縮')
+    expect(ja.tabs.convert).toBe('画像変換')
+  })
+
+  it('中文的分頁名稱', () => {
+    expect(zh.tabs.split).toBe('圖片分割')
+  })
+
+  it('用頓號分隔檔名，上限提示帶著數字', () => {
+    expect(ja.listSep).toBe('、')
+    expect(ja.dropzone.limit(10, 3)).toBe('一度に処理できるのは最大 10 枚です。3 枚をスキップしました。')
   })
 })
 
@@ -103,16 +129,17 @@ describe('describeError', () => {
     tooLarge: new ImageError('tooLarge', 64),
   }
 
-  it.each(Object.entries(samples))('%s：中英文都有訊息，且不是通用的失敗訊息', (_code, error) => {
-    for (const messages of [zh, en]) {
+  it.each(Object.entries(samples))('%s：中、英、日都有訊息，且不是通用的失敗訊息', (_code, error) => {
+    for (const messages of [zh, en, ja]) {
       const text = describeError(error, messages)
       expect(text.length).toBeGreaterThan(0)
       expect(text).not.toBe(messages.errors.generic)
     }
   })
 
-  it('像素過多：訊息帶著上限（中文用「萬像素」，英文用 megapixels）', () => {
+  it('像素過多：訊息帶著上限（中文用「萬像素」，日文用「万画素」，英文用 megapixels）', () => {
     expect(describeError(samples.tooLarge, zh)).toBe('圖片像素過多（上限 6400 萬像素），已略過')
+    expect(describeError(samples.tooLarge, ja)).toBe('画像の画素数が多すぎるため（上限 6400 万画素）、スキップしました')
     expect(describeError(samples.tooLarge, en)).toBe(
       'This image has too many pixels (limit 64 megapixels). Skipped.',
     )
@@ -121,7 +148,9 @@ describe('describeError', () => {
   it('格式不支援：訊息帶著格式名稱，不是 MIME type', () => {
     expect(describeError(samples.formatUnsupported, zh)).toContain('AVIF')
     expect(describeError(samples.formatUnsupported, en)).toContain('AVIF')
+    expect(describeError(samples.formatUnsupported, ja)).toContain('AVIF')
     expect(describeError(samples.formatUnsupported, zh)).not.toContain('image/')
+    expect(describeError(samples.formatUnsupported, ja)).not.toContain('image/')
   })
 
   it('寬度太小：訊息帶著張數', () => {

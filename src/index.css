@@ -27,6 +27,12 @@
   background: var(--color-bg);
 }
 
+/* 日文優先用日文字型，避免漢字顯示成繁中字形 */
+:root:lang(ja) {
+  --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI',
+    'Yu Gothic', Meiryo, 'Helvetica Neue', Arial, sans-serif;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --color-bg: #0a0a0a;

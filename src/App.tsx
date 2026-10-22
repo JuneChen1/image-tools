@@ -9,9 +9,10 @@ const TAB_IDS = ['split', 'compress', 'convert'] as const
 type TabId = (typeof TAB_IDS)[number]
 
 // 語言名稱固定用該語言自己的寫法，不隨介面語言變動
-const LANGS: { id: Lang; label: string }[] = [
-  { id: 'zh', label: '中文' },
-  { id: 'en', label: 'English' },
+const LANGS: { id: Lang; label: string; htmlLang: string }[] = [
+  { id: 'zh', label: '中文', htmlLang: 'zh-Hant' },
+  { id: 'en', label: 'English', htmlLang: 'en' },
+  { id: 'ja', label: '日本語', htmlLang: 'ja' },
 ]
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
           onChange={(e) => setLang(e.target.value as Lang)}
         >
           {LANGS.map((l) => (
-            <option key={l.id} value={l.id} lang={l.id === 'zh' ? 'zh-Hant' : 'en'}>
+            <option key={l.id} value={l.id} lang={l.htmlLang}>
               {l.label}
             </option>
           ))}

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { en } from './en'
-import { I18nContext, type Lang } from './useI18n'
+import { ja } from './ja'
+import { isLang, langFromBrowser, type Lang } from './lang'
+import { I18nContext } from './useI18n'
 import { zh } from './zh'
 
 const BASE = import.meta.env.BASE_URL
 const STORAGE_KEY = 'image-tools-lang'
 
-function isLang(value: unknown): value is Lang {
-  return value === 'zh' || value === 'en'
-}
+const DICTIONARIES = { zh, en, ja }
 
 /** 從網址取語言：/image-tools/en/ → 'en'，沒有則回傳 null */
 function langFromPath(): Lang | null {
@@ -25,14 +25,14 @@ function preferredLang(): Lang {
   } catch {
     // localStorage 不可用時忽略
   }
-  return navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en'
+  return langFromBrowser(navigator.language)
 }
 
 const pathFor = (lang: Lang) => `${BASE}${lang}/`
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => langFromPath() ?? preferredLang())
-  const m = lang === 'zh' ? zh : en
+  const m = DICTIONARIES[lang]
 
   // 網址沒有語言（例如首頁、404）時，補上語言路徑
   useEffect(() => {
