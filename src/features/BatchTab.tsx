@@ -29,6 +29,12 @@ interface Result {
 /** 0 代表不限制 */
 const MAX_EDGE_CHOICES = [0, 4096, 2048, 1920, 1280]
 
+/**
+ * 清單內最多幾張。每次改設定都會把清單全部重做，AVIF 又很慢（約 5–12 秒一張），
+ * 結果也全留在記憶體裡，張數太多等待太久、手機也容易記憶體不足
+ */
+const MAX_FILES = 10
+
 // 檔名與 ZIP 名稱固定用英文，不隨介面語言變動
 const OUTPUT = {
   compress: { zipName: 'compressed.zip', suffix: '_compressed' },
@@ -115,7 +121,13 @@ export default function BatchTab({ mode }: { mode: Mode }) {
     <div className="panel">
       <Dropzone
         multiple
-        label={mode === 'compress' ? m.batch.compressDropLabel : m.batch.convertDropLabel}
+        maxFiles={MAX_FILES}
+        currentCount={files.length}
+        label={
+          mode === 'compress'
+            ? m.batch.compressDropLabel(MAX_FILES)
+            : m.batch.convertDropLabel(MAX_FILES)
+        }
         onFiles={(added) => setFiles((old) => [...old, ...added])}
       />
 

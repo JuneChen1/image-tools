@@ -16,6 +16,7 @@ export const zh = {
   dropzone: {
     hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF、HEIC）',
     singleOnly: '一次只能處理一張圖片，請只選擇一張。',
+    limit: (max: number, skipped: number) => `一次最多處理 ${max} 張，已略過 ${skipped} 張。`,
     rejected: (count: number, names: string) => `已略過 ${count} 個不支援的檔案：${names}`,
   },
   errors: {
@@ -38,8 +39,8 @@ export const zh = {
     numbering: (count: number) => `由左到右依序編號為 1 ～ ${count}，如要發文到 X 形成大圖，請照這個順序上傳。`,
   },
   batch: {
-    compressDropLabel: '選擇要壓縮的圖片（可多選）',
-    convertDropLabel: '選擇要轉檔的圖片（可多選）',
+    compressDropLabel: (max: number) => `選擇要壓縮的圖片（可多選，最多 ${max} 張）`,
+    convertDropLabel: (max: number) => `選擇要轉檔的圖片（可多選，最多 ${max} 張）`,
     settingsTitle: '設定',
     keepFormat: '維持原格式',
     maxEdgeLabel: '最長邊上限',

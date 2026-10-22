@@ -18,6 +18,8 @@ export const en: Messages = {
   dropzone: {
     hint: 'Drop images here, or click to choose files (JPEG, PNG, WebP, AVIF, HEIC supported)',
     singleOnly: 'Only one image can be processed at a time. Please choose just one.',
+    limit: (max, skipped) =>
+      `Up to ${max} images at a time. Skipped ${skipped} ${skipped === 1 ? 'image' : 'images'}.`,
     rejected: (count, names) =>
       `Skipped ${count} unsupported ${count === 1 ? 'file' : 'files'}: ${names}`,
   },
@@ -41,8 +43,8 @@ export const en: Messages = {
     numbering: (count) => `Numbered 1–${count} from left to right. To post them to X as one large image, upload them in this order.`,
   },
   batch: {
-    compressDropLabel: 'Choose images to compress (multiple allowed)',
-    convertDropLabel: 'Choose images to convert (multiple allowed)',
+    compressDropLabel: (max) => `Choose images to compress (up to ${max})`,
+    convertDropLabel: (max) => `Choose images to convert (up to ${max})`,
     settingsTitle: 'Settings',
     keepFormat: 'Keep original format',
     maxEdgeLabel: 'Max longest edge',
