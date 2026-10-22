@@ -54,20 +54,20 @@ export const en: Messages = {
     countOption: (count) => `${count} parts`,
     pngRecommended: ' (lossless, recommended)',
     resultTitle: 'Result',
-    numbering: (count) => `Numbered 1–${count} from left to right. To post them to X as one large image, upload them in this order.`,
+    numbering: (count) => `Numbered 1–${count} from left to right. To post them to X as one seamless image, upload them in this order.`,
   },
   batch: {
     compressDropLabel: (max) => `Choose images to compress (up to ${max})`,
     convertDropLabel: (max) => `Choose images to convert (up to ${max})`,
     settingsTitle: 'Settings',
     keepFormat: 'Keep original format',
-    maxEdgeLabel: 'Max longest edge',
+    maxEdgeLabel: 'Max edge size',
     unlimited: 'No limit',
     backgroundLabel: 'Background color',
     compressPngNote:
       'PNG is lossless, so the quality slider has no effect on it. To shrink files a lot, output WebP or JPEG, or limit the longest edge.',
     convertJpegNote:
-      'JPEG does not support transparent backgrounds. If the image has cut-out (transparent) areas, they will be filled with this color (regular photos are not affected).',
+      'JPEG does not support transparency. Any transparent areas will be filled with this background color (images without transparency are not affected).',
     resultsTitle: 'Results',
     total: (before, after) => `Total ${before} → ${after}`,
     saved: (percent) => `saved ${percent}%`,
