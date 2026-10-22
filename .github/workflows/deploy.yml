@@ -1,0 +1,68 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # 開 Pull Request 時只檢查（lint、測試、建置），不會部署
+  pull_request:
+  # 也可以在 GitHub 的 Actions 頁面手動執行
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # 同一個 PR 又推了新的 commit 時，取消舊的檢查；部署則不取消，避免部署到一半被中斷
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # ci 會嚴格依照 package-lock.json 安裝，鎖定檔與 package.json 不一致時會直接失敗
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm test
+
+      # 內容是：型別檢查 + 建置 + 產生 /zh/、/en/ 頁面與 404.html
+      - run: npm run build
+        # 之後接 Google Analytics 時，在這裡帶入衡量 ID（公開識別碼，不是機密）：
+        # env:
+        #   VITE_GA_ID: ${{ vars.VITE_GA_ID }}
+
+      - name: Upload site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
