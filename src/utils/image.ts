@@ -12,6 +12,25 @@ export const FORMAT_EXT: Record<Format, string> = {
   'image/webp': 'webp',
 }
 
+export type ImageErrorCode =
+  | 'canvasTooLarge'
+  | 'encodeFailed'
+  | 'formatUnsupported'
+  | 'readFailed'
+  | 'tooNarrow'
+
+/** 錯誤只帶代碼與參數，顯示文字交給 i18n，這樣切換語言時訊息會跟著變 */
+export class ImageError extends Error {
+  code: ImageErrorCode
+  detail?: string | number
+
+  constructor(code: ImageErrorCode, detail?: string | number) {
+    super(code)
+    this.code = code
+    this.detail = detail
+  }
+}
+
 export interface Crop {
   x: number
   y: number
@@ -50,7 +69,7 @@ export async function renderBlob(
   canvas.width = width
   canvas.height = height
   const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('圖片太大，瀏覽器無法處理')
+  if (!ctx) throw new ImageError('canvasTooLarge')
 
   if (options.format === 'image/jpeg') {
     ctx.fillStyle = options.background
@@ -62,10 +81,10 @@ export async function renderBlob(
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, options.format, options.quality),
   )
-  if (!blob) throw new Error('瀏覽器無法輸出圖片')
+  if (!blob) throw new ImageError('encodeFailed')
   // 不支援的格式會被瀏覽器悄悄換成 PNG，這裡要擋下來
   if (blob.type !== options.format) {
-    throw new Error(`這個瀏覽器不支援輸出 ${FORMAT_LABEL[options.format]}`)
+    throw new ImageError('formatUnsupported', options.format)
   }
   return { blob, width, height }
 }

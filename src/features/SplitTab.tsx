@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
+import { describeError, useI18n } from '../i18n'
 import {
   FORMAT_EXT,
   FORMAT_LABEL,
+  ImageError,
   baseName,
   downloadBlob,
   downloadZip,
@@ -30,12 +32,13 @@ interface Part {
 }
 
 export default function SplitTab() {
+  const { m } = useI18n()
   const [source, setSource] = useState<Source | null>(null)
   const [count, setCount] = useState(3)
   const [format, setFormat] = useState<Format>('image/png')
   const [quality, setQuality] = useState(92)
   const [parts, setParts] = useState<Part[]>([])
-  const [error, setError] = useState('')
+  const [error, setError] = useState<unknown>(null)
   const sourceRef = useRef<Source | null>(null)
 
   function release(s: Source | null) {
@@ -51,9 +54,9 @@ export default function SplitTab() {
       release(sourceRef.current)
       sourceRef.current = next
       setSource(next)
-      setError('')
+      setError(null)
     } catch {
-      setError('無法讀取這張圖片，請確認格式（支援 JPEG、PNG、WebP 等瀏覽器可開啟的格式）')
+      setError(new ImageError('readFailed'))
     }
   }
 
@@ -67,7 +70,7 @@ export default function SplitTab() {
 
     ;(async () => {
       try {
-        if (bitmap.width < count) throw new Error(`圖片寬度太小，無法切成 ${count} 張`)
+        if (bitmap.width < count) throw new ImageError('tooNarrow', count)
         const bounds = splitBounds(bitmap.width, count)
         const base = baseName(file.name)
         const next: Part[] = []
@@ -90,10 +93,10 @@ export default function SplitTab() {
         }
         if (!cancelled) {
           setParts(next)
-          setError('')
+          setError(null)
         }
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : '處理失敗')
+        if (!cancelled) setError(e)
       }
     })()
 
@@ -105,15 +108,15 @@ export default function SplitTab() {
 
   return (
     <div className="panel">
-      <Dropzone label="選擇要切開的圖片" onFiles={handleFiles} />
-      {error && <p className="error">{error}</p>}
+      <Dropzone label={m.split.dropLabel} onFiles={handleFiles} />
+      {error != null && <p className="error">{describeError(error, m)}</p>}
 
       {source && (
         <>
           <section className="card">
-            <h2>切割預覽</h2>
+            <h2>{m.split.previewTitle}</h2>
             <div className="split-preview">
-              <img src={source.url} alt="原圖" />
+              <img src={source.url} alt={m.split.originalAlt} />
               {Array.from({ length: count - 1 }, (_, i) => (
                 <i
                   key={i}
@@ -129,10 +132,10 @@ export default function SplitTab() {
           </section>
 
           <section className="card">
-            <h2>切割設定</h2>
+            <h2>{m.split.settingsTitle}</h2>
             <div className="options">
               <div className="field">
-                切成幾張
+                {m.split.countLabel}
                 <div className="segmented">
                   {COUNT_CHOICES.map((n) => (
                     <button
@@ -140,25 +143,25 @@ export default function SplitTab() {
                       className={n === count ? 'active' : ''}
                       onClick={() => setCount(n)}
                     >
-                      {n} 張
+                      {m.split.countOption(n)}
                     </button>
                   ))}
                 </div>
               </div>
               <label>
-                輸出格式
+                {m.common.outputFormat}
                 <select value={format} onChange={(e) => setFormat(e.target.value as Format)}>
                   {(Object.keys(FORMAT_LABEL) as Format[]).map((f) => (
                     <option key={f} value={f}>
                       {FORMAT_LABEL[f]}
-                      {f === 'image/png' ? '（無損，建議）' : ''}
+                      {f === 'image/png' ? m.split.pngRecommended : ''}
                     </option>
                   ))}
                 </select>
               </label>
               {format !== 'image/png' && (
                 <label>
-                  品質 {quality}
+                  {m.common.quality} {quality}
                   <input
                     type="range"
                     min={50}
@@ -174,7 +177,7 @@ export default function SplitTab() {
           {parts.length === count && (
             <section className="card">
               <div className="card-head">
-                <h2>切割結果</h2>
+                <h2>{m.split.resultTitle}</h2>
                 <button
                   className="primary"
                   onClick={() =>
@@ -184,7 +187,7 @@ export default function SplitTab() {
                     )
                   }
                 >
-                  下載全部 (ZIP)
+                  {m.common.downloadAll}
                 </button>
               </div>
               <div
@@ -198,12 +201,14 @@ export default function SplitTab() {
                       <span>
                         {p.width} × {p.height}・{formatSize(p.blob.size)}
                       </span>
-                      <button onClick={() => downloadBlob(p.blob, p.name)}>下載</button>
+                      <button onClick={() => downloadBlob(p.blob, p.name)}>
+                        {m.common.download}
+                      </button>
                     </figcaption>
                   </figure>
                 ))}
               </div>
-              <p className="hint">由左到右依序編號為 1 ～ {count}，上傳時請照這個順序。</p>
+              <p className="hint">{m.split.numbering(count)}</p>
             </section>
           )}
         </>

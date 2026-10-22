@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useI18n } from '../i18n'
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
 const ACCEPT_ATTR = ACCEPTED_TYPES.join(',')
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function Dropzone({ multiple = false, label, onFiles }: Props) {
+  const { m } = useI18n()
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [rejected, setRejected] = useState<string[]>([])
@@ -46,7 +48,7 @@ export default function Dropzone({ multiple = false, label, onFiles }: Props) {
         }}
       >
         <p>{label}</p>
-        <span>拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF）</span>
+        <span>{m.dropzone.hint}</span>
         <input
           ref={inputRef}
           type="file"
@@ -61,7 +63,7 @@ export default function Dropzone({ multiple = false, label, onFiles }: Props) {
       </div>
       {rejected.length > 0 && (
         <p className="error rejected">
-          已略過 {rejected.length} 個不支援的檔案：{rejected.join('、')}
+          {m.dropzone.rejected(rejected.length, rejected.join(m.listSep))}
         </p>
       )}
     </div>

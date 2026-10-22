@@ -1,36 +1,54 @@
 import { useState } from 'react'
 import BatchTab from './features/BatchTab'
 import SplitTab from './features/SplitTab'
+import { useI18n, type Lang } from './i18n'
 import './App.css'
 
-const TABS = [
-  { id: 'split', label: '切圖' },
-  { id: 'compress', label: '圖片壓縮' },
-  { id: 'convert', label: '圖片轉檔' },
-] as const
+const TAB_IDS = ['split', 'compress', 'convert'] as const
+type TabId = (typeof TAB_IDS)[number]
 
-type TabId = (typeof TABS)[number]['id']
+// 語言名稱固定用該語言自己的寫法，不隨介面語言變動
+const LANGS: { id: Lang; label: string }[] = [
+  { id: 'zh', label: '中文' },
+  { id: 'en', label: 'English' },
+]
 
 function App() {
+  const { lang, m, setLang } = useI18n()
   const [tab, setTab] = useState<TabId>('split')
 
   return (
     <main className="app">
-      <header>
-        <h1>圖片工具箱</h1>
-        <p>所有處理都在你的瀏覽器內完成，圖片不會上傳到任何伺服器。</p>
+      <header className="app-head">
+        <div>
+          <h1>{m.siteTitle}</h1>
+          <p>{m.tagline}</p>
+        </div>
+        <div className="segmented" role="group" aria-label={m.langSwitchLabel}>
+          {LANGS.map((l) => (
+            <button
+              key={l.id}
+              className={l.id === lang ? 'active' : ''}
+              aria-pressed={l.id === lang}
+              lang={l.id === 'zh' ? 'zh-Hant' : 'en'}
+              onClick={() => setLang(l.id)}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
       </header>
 
       <nav className="tabs" role="tablist">
-        {TABS.map((t) => (
+        {TAB_IDS.map((id) => (
           <button
-            key={t.id}
+            key={id}
             role="tab"
-            aria-selected={tab === t.id}
-            className={tab === t.id ? 'active' : ''}
-            onClick={() => setTab(t.id)}
+            aria-selected={tab === id}
+            className={tab === id ? 'active' : ''}
+            onClick={() => setTab(id)}
           >
-            {t.label}
+            {m.tabs[id]}
           </button>
         ))}
       </nav>

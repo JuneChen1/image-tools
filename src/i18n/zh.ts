@@ -1,0 +1,57 @@
+export const zh = {
+  htmlLang: 'zh-Hant',
+  siteTitle: '圖片工具箱',
+  tagline: '所有處理都在你的瀏覽器內完成，圖片不會上傳到任何伺服器。',
+  langSwitchLabel: '語言',
+  listSep: '、',
+  tabs: { split: '切圖', compress: '圖片壓縮', convert: '圖片轉檔' },
+  common: {
+    download: '下載',
+    downloadAll: '下載全部 (ZIP)',
+    clearAll: '清除全部',
+    outputFormat: '輸出格式',
+    quality: '品質',
+  },
+  dropzone: {
+    hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF）',
+    rejected: (count: number, names: string) => `已略過 ${count} 個不支援的檔案：${names}`,
+  },
+  errors: {
+    generic: '處理失敗',
+    canvasTooLarge: '圖片太大，瀏覽器無法處理',
+    encodeFailed: '瀏覽器無法輸出圖片',
+    formatUnsupported: (format: string) => `這個瀏覽器不支援輸出 ${format}`,
+    readFailed: '無法讀取這張圖片，請確認格式是否正確',
+    tooNarrow: (count: number) => `圖片寬度太小，無法切成 ${count} 張`,
+  },
+  split: {
+    dropLabel: '選擇要切開的圖片',
+    previewTitle: '切割預覽',
+    originalAlt: '原圖',
+    settingsTitle: '切割設定',
+    countLabel: '切成幾張',
+    countOption: (count: number) => `${count} 張`,
+    pngRecommended: '（無損，建議）',
+    resultTitle: '切割結果',
+    numbering: (count: number) => `由左到右依序編號為 1 ～ ${count}，上傳時請照這個順序。`,
+  },
+  batch: {
+    compressDropLabel: '選擇要壓縮的圖片（可多選）',
+    convertDropLabel: '選擇要轉檔的圖片（可多選）',
+    settingsTitle: '設定',
+    keepFormat: '維持原格式',
+    maxEdgeLabel: '最長邊上限',
+    unlimited: '不限制',
+    backgroundLabel: '透明處填色',
+    compressPngNote:
+      'PNG 是無損格式，品質滑桿對 PNG 無效；想大幅縮小檔案，請改輸出 WebP 或 JPEG，或限制最長邊。',
+    convertJpegNote: 'JPEG 不支援透明，透明區域會填上上面選的顏色。',
+    resultsTitle: '結果',
+    processing: '處理中…',
+    total: (before: string, after: string) => `共 ${before} → ${after}`,
+    saved: (percent: number) => `省下 ${percent}%`,
+    grew: (percent: number) => `增加 ${percent}%`,
+  },
+}
+
+export type Messages = typeof zh
