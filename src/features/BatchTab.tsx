@@ -46,7 +46,8 @@ const OUTPUT = {
 export default function BatchTab({ mode }: { mode: Mode }) {
   const { m } = useI18n()
   const [files, setFiles] = useState<File[]>([])
-  const [choice, setChoice] = useState<FormatChoice>(mode === 'compress' ? 'keep' : 'image/webp')
+  // 轉檔預設 JPEG：最常用，所有裝置（含 iPhone Safari，它不能輸出 WebP）都能用
+  const [choice, setChoice] = useState<FormatChoice>(mode === 'compress' ? 'keep' : 'image/jpeg')
   const [quality, setQuality] = useState(80)
   const [maxEdge, setMaxEdge] = useState(0)
   const [background, setBackground] = useState('#ffffff')
