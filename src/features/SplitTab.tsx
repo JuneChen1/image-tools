@@ -172,6 +172,7 @@ export default function SplitTab() {
                 </label>
               )}
             </div>
+            {format === 'image/avif' && <p className="hint">{m.common.avifSlowNote}</p>}
           </section>
 
           {parts.length === count && (

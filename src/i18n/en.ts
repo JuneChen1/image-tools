@@ -12,6 +12,8 @@ export const en: Messages = {
     clearAll: 'Clear all',
     outputFormat: 'Output format',
     quality: 'Quality',
+    avifSlowNote:
+      'AVIF encoding is slow. Large images can take several seconds or more, and the page may briefly stop responding.',
   },
   dropzone: {
     hint: 'Drop images here, or click to choose files (JPEG, PNG, WebP, AVIF supported)',

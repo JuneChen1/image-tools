@@ -10,6 +10,7 @@ export const zh = {
     clearAll: '清除全部',
     outputFormat: '輸出格式',
     quality: '品質',
+    avifSlowNote: 'AVIF 的編碼速度較慢，大張圖片可能需要數秒到數十秒，處理期間畫面可能暫時無回應。',
   },
   dropzone: {
     hint: '拖放圖片到這裡，或點擊選擇檔案（支援 JPEG、PNG、WebP、AVIF）',

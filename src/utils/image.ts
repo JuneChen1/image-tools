@@ -1,15 +1,17 @@
-export type Format = 'image/jpeg' | 'image/png' | 'image/webp'
+export type Format = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif'
 
 export const FORMAT_LABEL: Record<Format, string> = {
   'image/jpeg': 'JPEG',
   'image/png': 'PNG',
   'image/webp': 'WebP',
+  'image/avif': 'AVIF',
 }
 
 export const FORMAT_EXT: Record<Format, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
+  'image/avif': 'avif',
 }
 
 export type ImageErrorCode =
@@ -77,6 +79,19 @@ export async function renderBlob(
   }
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, width, height)
+
+  // Canvas 不能輸出 AVIF，改走 WebAssembly 編碼器（保留透明）
+  if (options.format === 'image/avif') {
+    try {
+      const { encodeAvif } = await import('./avif')
+      const image = ctx.getImageData(0, 0, width, height)
+      const blob = await encodeAvif(image, Math.round(options.quality * 100))
+      return { blob, width, height }
+    } catch (e) {
+      console.error('AVIF encode failed', e)
+      throw new ImageError('encodeFailed')
+    }
+  }
 
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, options.format, options.quality),

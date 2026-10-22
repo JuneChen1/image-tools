@@ -37,7 +37,8 @@ const OUTPUT = {
 
 function resolveFormat(file: File, choice: FormatChoice): Format {
   if (choice !== 'keep') return choice
-  return file.type === 'image/png' || file.type === 'image/webp' ? file.type : 'image/jpeg'
+  const keepable: string[] = ['image/png', 'image/webp', 'image/avif']
+  return keepable.includes(file.type) ? (file.type as Format) : 'image/jpeg'
 }
 
 export default function BatchTab({ mode }: { mode: Mode }) {
@@ -181,6 +182,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
           {mode === 'convert' && choice === 'image/jpeg' && (
             <p className="hint">{m.batch.convertJpegNote}</p>
           )}
+          {choice === 'image/avif' && <p className="hint">{m.common.avifSlowNote}</p>}
         </section>
       )}
 
