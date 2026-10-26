@@ -1,6 +1,6 @@
 import { decodeImage, probeImageFile } from '../utils/decode'
-import { ImageError, renderBlob, type RenderResult } from '../utils/image'
-import type { RenderRequest, WorkerRequest, WorkerResponse } from './protocol'
+import { ImageError, combineBlobs, renderBlob, type RenderResult } from '../utils/image'
+import type { CombineRequest, RenderRequest, WorkerRequest, WorkerResponse } from './protocol'
 
 // 不引入 WebWorker 型別庫（會與 DOM 型別衝突），只宣告用得到的部分
 interface WorkerScope {
@@ -37,6 +37,25 @@ async function render({ id, file, jobs }: RenderRequest): Promise<WorkerResponse
   }
 }
 
+async function combine({ id, files, options }: CombineRequest): Promise<WorkerResponse> {
+  const bitmaps: ImageBitmap[] = []
+  try {
+    for (const file of files) {
+      try {
+        bitmaps.push(await decodeImage(file))
+      } catch (error) {
+        throw error instanceof ImageError ? error : new ImageError('readFailed')
+      }
+      if (cancelled.has(id)) return { id, ok: false, cancelled: true }
+    }
+    const result = await combineBlobs(bitmaps, options)
+    if (cancelled.has(id)) return { id, ok: false, cancelled: true }
+    return { id, ok: true, results: [result] }
+  } finally {
+    bitmaps.forEach((bitmap) => bitmap.close())
+  }
+}
+
 scope.onmessage = async (event) => {
   const request = event.data
 
@@ -58,6 +77,8 @@ scope.onmessage = async (event) => {
       scope.postMessage(
         cancelled.has(id) ? { id, ok: false, cancelled: true } : { id, ok: true, probe },
       )
+    } else if (request.type === 'combine') {
+      scope.postMessage(await combine(request))
     } else {
       scope.postMessage(await render(request))
     }

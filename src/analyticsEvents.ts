@@ -7,7 +7,7 @@ import { trackEvent, type EventParams } from './analytics'
 import { isHeicFile } from './utils/decode'
 import { ImageError } from './utils/image'
 
-export type Tool = 'split' | 'compress' | 'convert'
+export type Tool = 'split' | 'combine' | 'compress' | 'convert'
 export type SaveMethod = 'zip' | 'single' | 'share'
 export type RejectReason =
   | 'unsupported'

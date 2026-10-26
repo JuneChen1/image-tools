@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { trackSaveResult, trackShareFailure, type Tool } from '../analyticsEvents'
 import { useI18n } from '../i18n'
-import { downloadZip } from '../utils/image'
+import { downloadBlob, downloadZip } from '../utils/image'
 import { canShareFiles, shareFiles, toFiles, type NamedBlob } from '../utils/share'
 
 interface Props {
   tool: Tool
   items: NamedBlob[]
-  zipName: string
+  /** 不給就是單一檔案：主按鈕直接下載第一個檔案，不打包 ZIP */
+  zipName?: string
   /** 切圖才有：切成幾張，回報統計用 */
   splitParts?: number
 }
@@ -45,11 +46,16 @@ export default function ResultActions({ tool, items, zipName, splitParts }: Prop
         <button
           className="primary"
           onClick={() => {
-            trackSaveResult({ tool, method: 'zip', blobs, splitParts })
-            downloadZip(items, zipName)
+            if (zipName) {
+              trackSaveResult({ tool, method: 'zip', blobs, splitParts })
+              downloadZip(items, zipName)
+            } else {
+              trackSaveResult({ tool, method: 'single', blobs })
+              downloadBlob(items[0].blob, items[0].name)
+            }
           }}
         >
-          {m.common.downloadAll}
+          {zipName ? m.common.downloadAll : m.common.download}
         </button>
       </div>
       {failed && <p className="error">{m.common.shareFailed}</p>}

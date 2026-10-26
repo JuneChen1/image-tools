@@ -597,6 +597,29 @@ input[type='range']:focus-visible::-moz-range-thumb {
   letter-spacing: normal;
 }
 
+/* 合併：清單每列右側的操作、合併結果預覽 */
+.row-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px var(--space-sm);
+}
+
+.row-actions button:disabled {
+  border-bottom-color: transparent;
+  opacity: 0.35;
+  cursor: default;
+}
+
+.combine-result img {
+  display: block;
+  max-width: 100%;
+  max-height: 720px;
+  border: 1px solid var(--color-line);
+  background: repeating-conic-gradient(#8881 0% 25%, transparent 0% 50%) 50% / 16px 16px;
+}
+
 @media (max-width: 900px) {
   .app-head {
     margin-bottom: 40px;

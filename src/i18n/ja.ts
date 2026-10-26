@@ -5,7 +5,7 @@ export const ja: Messages = {
   siteTitle: '画像ツールボックス',
   langSwitchLabel: '言語',
   listSep: '、',
-  tabs: { split: '画像分割', compress: '画像圧縮', convert: '画像変換' },
+  tabs: { split: '画像分割', combine: '画像結合', compress: '画像圧縮', convert: '画像変換' },
   consent: {
     title: 'アクセス解析の設定',
     text: 'このサイトでは、サイトの改善のために Google Analytics で閲覧数や機能の利用状況を集計しています。画像やファイル名は収集されず、画像はこれまでどおりブラウザ内だけで処理されます。',
@@ -53,6 +53,23 @@ export const ja: Messages = {
     resultTitle: '分割結果',
     numbering: (count) =>
       `左から順に 1～${count} の番号が付きます。X に投稿して 1 枚の大きな画像に見せるには、この順番でアップロードしてください。`,
+  },
+  combine: {
+    dropLabel: (max) => `結合する画像を選択（2～${max} 枚、数回に分けて追加可）`,
+    listTitle: '結合する画像',
+    moveUp: '上へ',
+    moveDown: '下へ',
+    remove: '削除',
+    needMore: '結合するには画像が 2 枚以上必要です。あと 1 枚追加してください。',
+    settingsTitle: '結合設定',
+    dividerLabel: '区切り線',
+    dividerColor: '区切り線の色',
+    dividerOn: 'あり',
+    dividerOff: 'なし',
+    pngRecommended: '（可逆圧縮・おすすめ）',
+    resultTitle: '結合結果',
+    resultAlt: '結合した画像',
+    orderNote: 'リストの順に上から下へ結合します。幅が異なる場合は、最も幅の広い画像に合わせて拡大されます。',
   },
   batch: {
     compressDropLabel: (max) => `圧縮する画像を選択（複数選択可、最大 ${max} 枚）`,

@@ -1,6 +1,13 @@
 import type { OkResponse, WorkerRequest, WorkerResponse } from '../workers/protocol'
 import { decodeImage, probeImageFile, type ProbeResult } from './decode'
-import { ImageError, renderBlob, type RenderOptions, type RenderResult } from './image'
+import {
+  ImageError,
+  combineBlobs,
+  renderBlob,
+  type CombineOptions,
+  type RenderOptions,
+  type RenderResult,
+} from './image'
 
 export type { ProbeResult }
 
@@ -121,6 +128,28 @@ async function renderOnMainThread(
   }
 }
 
+async function combineOnMainThread(
+  files: File[],
+  options: CombineOptions,
+  signal?: AbortSignal,
+): Promise<RenderResult> {
+  const bitmaps: ImageBitmap[] = []
+  try {
+    for (const file of files) {
+      if (signal?.aborted) throw new AbortedError()
+      try {
+        bitmaps.push(await decodeImage(file))
+      } catch (error) {
+        throw error instanceof ImageError ? error : new ImageError('readFailed')
+      }
+    }
+    if (signal?.aborted) throw new AbortedError()
+    return await combineBlobs(bitmaps, options)
+  } finally {
+    bitmaps.forEach((bitmap) => bitmap.close())
+  }
+}
+
 async function probeOnMainThread(file: File): Promise<ProbeResult> {
   try {
     return await probeImageFile(file)
@@ -159,6 +188,22 @@ export function processImage(
       return response.results
     },
     () => renderOnMainThread(file, jobs, signal),
+  )
+}
+
+/** 把多張圖由上到下合併成一張（解碼、合成、編碼都在 Worker 內） */
+export function combineImages(
+  files: File[],
+  options: CombineOptions,
+  signal?: AbortSignal,
+): Promise<RenderResult> {
+  return withFallback(
+    async () => {
+      const response = await dispatch((id) => ({ type: 'combine', id, files, options }), signal)
+      if (!('results' in response)) throw new Error('unexpected worker response')
+      return response.results[0]
+    },
+    () => combineOnMainThread(files, options, signal),
   )
 }
 

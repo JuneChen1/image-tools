@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import AnalyticsConsent from './components/AnalyticsConsent'
 import BatchTab from './features/BatchTab'
+import CombineTab from './features/CombineTab'
 import SplitTab from './features/SplitTab'
 import { useI18n, type Lang } from './i18n'
 import './App.css'
 
-const TAB_IDS = ['split', 'compress', 'convert'] as const
+const TAB_IDS = ['split', 'combine', 'compress', 'convert'] as const
 type TabId = (typeof TAB_IDS)[number]
 
 // 語言名稱固定用該語言自己的寫法，不隨介面語言變動
@@ -52,9 +53,12 @@ function App() {
         ))}
       </nav>
 
-      {/* 三個分頁都保持掛載，切換時不會丟失已上傳的圖片 */}
+      {/* 四個分頁都保持掛載，切換時不會丟失已上傳的圖片 */}
       <div hidden={tab !== 'split'}>
         <SplitTab />
+      </div>
+      <div hidden={tab !== 'combine'}>
+        <CombineTab />
       </div>
       <div hidden={tab !== 'compress'}>
         <BatchTab mode="compress" />

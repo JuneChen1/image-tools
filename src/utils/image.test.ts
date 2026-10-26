@@ -4,6 +4,7 @@ import {
   FORMAT_LABEL,
   ImageError,
   baseName,
+  combineLayout,
   formatSize,
   resolveOutputFormat,
   splitBounds,
@@ -12,6 +13,39 @@ import {
 } from './image'
 
 const FORMATS: Format[] = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
+
+describe('combineLayout', () => {
+  it('同樣寬度、沒有分隔線：直接上下相接，外圍沒有留白', () => {
+    expect(combineLayout([{ width: 100, height: 50 }, { width: 100, height: 70 }], false)).toEqual({
+      width: 100,
+      height: 120,
+      tiles: [{ x: 0, y: 0, w: 100, h: 50 }, { x: 0, y: 50, w: 100, h: 70 }],
+      gap: 0,
+    })
+  })
+
+  it('有分隔線：圖與圖之間與外圍都留間隔（內容寬 1000 時 8 px）', () => {
+    const layout = combineLayout(
+      [{ width: 1000, height: 100 }, { width: 1000, height: 100 }, { width: 1000, height: 100 }],
+      true,
+    )
+    expect(layout.gap).toBe(8)
+    expect(layout.width).toBe(1016)
+    expect(layout.tiles.map((t) => [t.x, t.y])).toEqual([[8, 8], [8, 116], [8, 224]])
+    expect(layout.height).toBe(332)
+  })
+
+  it('分隔線最少 2 px', () => {
+    expect(combineLayout([{ width: 100, height: 10 }, { width: 100, height: 10 }], true).gap).toBe(2)
+  })
+
+  it('寬度不同：以最寬的為準，較窄的等比例放大', () => {
+    const layout = combineLayout([{ width: 200, height: 100 }, { width: 100, height: 100 }], false)
+    expect(layout.width).toBe(200)
+    expect(layout.tiles.map((t) => [t.w, t.h])).toEqual([[200, 100], [200, 200]])
+    expect(layout.height).toBe(300)
+  })
+})
 
 describe('splitBounds', () => {
   it('把 1001 px 切成 3 張：334 / 333 / 334', () => {

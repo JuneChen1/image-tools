@@ -61,12 +61,18 @@ describe('中、英、日字典', () => {
 describe('日文（使用者指定的文字）', () => {
   it('分頁名稱：圖片分割用「画像分割」', () => {
     expect(ja.tabs.split).toBe('画像分割')
+    expect(ja.tabs.combine).toBe('画像結合')
     expect(ja.tabs.compress).toBe('画像圧縮')
     expect(ja.tabs.convert).toBe('画像変換')
   })
 
   it('中文的分頁名稱', () => {
     expect(zh.tabs.split).toBe('圖片分割')
+  })
+
+  it('合併分頁的名稱', () => {
+    expect(zh.tabs.combine).toBe('圖片合併')
+    expect(en.tabs.combine).toBe('Combine')
   })
 
   it('用頓號分隔檔名，上限提示帶著數字', () => {

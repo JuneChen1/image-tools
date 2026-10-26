@@ -1,3 +1,5 @@
+import { MAX_PIXELS } from './limits'
+
 export type Format = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif'
 
 export const FORMAT_LABEL: Record<Format, string> = {
@@ -111,7 +113,8 @@ export async function renderBlob(
   const width = Math.max(1, Math.round(crop.w * scale))
   const height = Math.max(1, Math.round(crop.h * scale))
 
-  const { ctx, toBlob } = createSurface(width, height)
+  const surface = createSurface(width, height)
+  const { ctx } = surface
   if (!ctx) throw new ImageError('canvasTooLarge')
 
   if (options.format === 'image/jpeg') {
@@ -121,6 +124,16 @@ export async function renderBlob(
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, width, height)
 
+  return encodeSurface({ ctx, toBlob: surface.toBlob }, width, height, options)
+}
+
+/** 把畫好的 Surface 編碼成指定格式 */
+async function encodeSurface(
+  { ctx, toBlob }: { ctx: Context2D; toBlob: Surface['toBlob'] },
+  width: number,
+  height: number,
+  options: Pick<RenderOptions, 'format' | 'quality'>,
+): Promise<RenderResult> {
   // Canvas 不能輸出 AVIF，改走 WebAssembly 編碼器（保留透明）
   if (options.format === 'image/avif') {
     try {
@@ -141,6 +154,74 @@ export async function renderBlob(
     throw new ImageError('formatUnsupported', options.format)
   }
   return { blob, width, height }
+}
+
+/** 合併時分隔線的粗細占寬度的比例，最少 2px */
+const DIVIDER_RATIO = 0.008
+/** 瀏覽器單邊的 Canvas 上限（保守值，Chrome 與 Safari 的共同下限約在這裡） */
+const MAX_CANVAS_EDGE = 32767
+
+export interface CombineLayout {
+  width: number
+  height: number
+  /** 每張圖在合併結果裡的位置與縮放後的大小，順序同輸入 */
+  tiles: { x: number; y: number; w: number; h: number }[]
+  /** 分隔線粗細：圖與圖之間以及最外圍都是這個寬度，沒有分隔線時是 0 */
+  gap: number
+}
+
+/**
+ * 由上到下排列：全部縮放到同樣的寬度（取最寬的那張，不縮小任何一張）。
+ * 有分隔線時，圖與圖之間以及整張圖的外圍都留一圈白線
+ */
+export function combineLayout(sizes: { width: number; height: number }[], divider: boolean): CombineLayout {
+  const contentWidth = Math.max(...sizes.map((s) => s.width))
+  const gap = divider ? Math.max(2, Math.round(contentWidth * DIVIDER_RATIO)) : 0
+  let y = gap
+  const tiles = sizes.map((s) => {
+    const h = Math.max(1, Math.round((s.height * contentWidth) / s.width))
+    const tile = { x: gap, y, w: contentWidth, h }
+    y += h + gap
+    return tile
+  })
+  return { width: contentWidth + gap * 2, height: y, tiles, gap }
+}
+
+export interface CombineOptions {
+  format: Format
+  quality: number
+  /** 是否加分隔線（圖與圖之間與外圍） */
+  divider: boolean
+  /** 分隔線顏色 */
+  dividerColor: string
+}
+
+/** 把多張圖由上到下合併成一張。主執行緒與 Web Worker 都能呼叫 */
+export async function combineBlobs(
+  bitmaps: ImageBitmap[],
+  options: CombineOptions,
+): Promise<RenderResult> {
+  const layout = combineLayout(bitmaps, options.divider)
+  const { width, height } = layout
+  if (width * height > MAX_PIXELS) throw new ImageError('tooLarge', MAX_PIXELS / 1_000_000)
+  if (height > MAX_CANVAS_EDGE) throw new ImageError('canvasTooLarge')
+
+  const surface = createSurface(width, height)
+  const { ctx } = surface
+  if (!ctx) throw new ImageError('canvasTooLarge')
+
+  // JPEG 沒有透明所以整張鋪底色；有分隔線時底色就是分隔線，不論格式都要鋪
+  if (options.format === 'image/jpeg' || layout.gap > 0) {
+    ctx.fillStyle = layout.gap > 0 ? options.dividerColor : '#ffffff'
+    ctx.fillRect(0, 0, width, height)
+  }
+  ctx.imageSmoothingQuality = 'high'
+  bitmaps.forEach((bitmap, i) => {
+    const { x, y, w, h } = layout.tiles[i]
+    ctx.drawImage(bitmap, x, y, w, h)
+  })
+
+  return encodeSurface({ ctx, toBlob: surface.toBlob }, width, height, options)
 }
 
 /** 把寬度切成 n 等份的邊界，餘數像素自然分攤，不會有縫隙 */
