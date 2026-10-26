@@ -7,11 +7,11 @@ export const ja: Messages = {
   listSep: '、',
   tabs: { split: '画像分割', combine: '画像結合', compress: '画像圧縮', convert: '画像変換' },
   consent: {
-    title: 'アクセス解析の設定',
+    title: 'プライバシー設定',
     text: 'このサイトでは、サイトの改善のために Google Analytics で閲覧数や機能の利用状況を集計しています。画像やファイル名は収集されず、画像はこれまでどおりブラウザ内だけで処理されます。',
     accept: '同意する',
     deny: '同意しない',
-    settings: 'アクセス解析の設定',
+    settings: 'プライバシー設定',
   },
   common: {
     download: 'ダウンロード',

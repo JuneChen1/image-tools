@@ -4,7 +4,7 @@ import { readConsent, saveConsent, type Consent } from '../consent'
 import { useI18n } from '../i18n'
 
 /**
- * 統計（Google Analytics）的同意橫幅與頁尾的「統計設定」連結。
+ * 統計（Google Analytics）的同意橫幅與頁尾的「隱私設定」連結。
  * 這個環境用不了 GA（開發環境、沒有衡量 ID、使用者開了「不要追蹤」）時什麼都不顯示。
  * 沒表態或拒絕都不會載入 GA；之後隨時可以從頁尾重新選擇
  */

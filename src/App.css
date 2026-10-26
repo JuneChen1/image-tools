@@ -198,7 +198,7 @@ button.primary:hover {
   margin-left: auto;
 }
 
-/* 頁尾：統計設定（只在可用 GA 的環境顯示），讓使用者隨時能重新選擇 */
+/* 頁尾：隱私設定（只在可用 GA 的環境顯示），讓使用者隨時能重新選擇 */
 .app-foot {
   display: flex;
   justify-content: flex-end;
