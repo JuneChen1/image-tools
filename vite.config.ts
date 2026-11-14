@@ -3,8 +3,8 @@ import { defineConfig } from 'vitest/config'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // GitHub Pages 專案頁面的網址是 /<repo 名稱>/
-  base: '/image-tools/',
+  // 自訂網域 imagetools.junenaga.com 直接掛在根路徑
+  base: '/',
   plugins: [react()],
   // Worker 內會動態載入 AVIF 編碼器，需要支援程式碼分割的 es 格式
   worker: { format: 'es' },

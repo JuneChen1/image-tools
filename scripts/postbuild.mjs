@@ -3,7 +3,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
 // 網站網址，需與 vite.config.ts 的 base 對應（結尾要有 /）
-const SITE = 'https://junechen1.github.io/image-tools/'
+const SITE = 'https://imagetools.junenaga.com/'
 
 // 標題需與 src/i18n 內的 siteTitle、htmlLang 保持一致
 const LANGS = {

@@ -10,7 +10,7 @@ const STORAGE_KEY = 'image-tools-lang'
 
 const DICTIONARIES = { zh, en, ja }
 
-/** 從網址取語言：/image-tools/en/ → 'en'，沒有則回傳 null */
+/** 從網址取語言：/en/ → 'en'，沒有則回傳 null */
 function langFromPath(): Lang | null {
   const rest = location.pathname.startsWith(BASE) ? location.pathname.slice(BASE.length) : ''
   const segment = rest.split('/')[0]

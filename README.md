@@ -3,7 +3,7 @@
 > **線上圖片處理工具**  
 > 專為社群媒體 X 發圖、圖片壓縮與格式轉換打造，支援 JPEG, PNG, WebP, AVIF, HEIC 格式。
 
-🔗 前往網頁：https://junechen1.github.io/image-tools
+🔗 前往網頁：https://imagetools.junenaga.com
 
 ---
 
