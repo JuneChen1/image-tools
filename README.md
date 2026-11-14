@@ -97,7 +97,7 @@ npm test          # 執行自動化測試
 ```
 image-tools/
 ├─ public/
-│  └─ favicon.svg
+│  └─ favicon.ico 等網站圖示、site.webmanifest
 ├─ scripts/
 │  └─ postbuild.mjs        建置後產生 /zh/、/en/ 頁面與 404.html
 ├─ src/
