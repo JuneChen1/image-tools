@@ -62,7 +62,7 @@ describe('splitBounds', () => {
 
   // 切圖拼回去要和原圖一致：不漏像素、不重疊、每張寬度最多差 1
   it.each([3, 4, 5, 100, 1001, 4032, 8000])('寬度 %i：邊界連續、涵蓋全寬、各張寬度差不超過 1', (width) => {
-    for (const parts of [2, 3, 4]) {
+    for (const parts of [2, 3, 4, 5, 6, 7, 8, 9, 10]) {
       // 寬度比張數還小時不可能每張都有像素；切圖頁本來就會拒絕這種圖（「圖片寬度太小」）
       if (parts > width) continue
       const bounds = splitBounds(width, parts)

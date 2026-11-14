@@ -16,8 +16,11 @@ import {
 import { probeImage, processImage } from '../utils/processImage'
 import { createOnce, trackError, trackFilesAdded, trackSaveResult } from '../analyticsEvents'
 
-/** X 一則貼文最多 4 張圖 */
-const COUNT_CHOICES = [2, 3, 4]
+/** 最多切成幾張（X 一則貼文現在最多 20 張圖，這裡限制在 10 張） */
+const MAX_PARTS = 10
+const COUNT_CHOICES = Array.from({ length: MAX_PARTS - 1 }, (_, i) => i + 2)
+/** 結果縮圖每列最多幾欄，超過就換行 */
+const MAX_RESULT_COLUMNS = 5
 
 interface Source {
   file: File
@@ -172,20 +175,16 @@ export default function SplitTab() {
           <section className="card">
             <h2>{m.split.settingsTitle}</h2>
             <div className="options">
-              <div className="field">
+              <label>
                 {m.split.countLabel}
-                <div className="segmented">
+                <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
                   {COUNT_CHOICES.map((n) => (
-                    <button
-                      key={n}
-                      className={n === count ? 'active' : ''}
-                      onClick={() => setCount(n)}
-                    >
+                    <option key={n} value={n}>
                       {m.split.countOption(n)}
-                    </button>
+                    </option>
                   ))}
-                </div>
-              </div>
+                </select>
+              </label>
               <label>
                 {m.common.outputFormat}
                 <select value={format} onChange={(e) => setFormat(e.target.value as Format)}>
@@ -230,7 +229,7 @@ export default function SplitTab() {
               </div>
               <div
                 className="parts-row"
-                style={{ gridTemplateColumns: `repeat(${count}, 1fr)` }}
+                style={{ gridTemplateColumns: `repeat(${Math.min(count, MAX_RESULT_COLUMNS)}, 1fr)` }}
               >
                 {parts.map((p) => (
                   <figure key={p.name}>
