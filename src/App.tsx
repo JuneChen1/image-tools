@@ -23,7 +23,13 @@ function App() {
   return (
     <main className="app">
       <header className="app-head">
-        <h1>{m.siteTitle}</h1>
+        <div className="head-title">
+          <h1>{m.siteTitle}</h1>
+          {/* 姊妹站：影片工具箱，放在標題右側，開新分頁，不會丟失已選的檔案 */}
+          <a className="other-tool" href="https://videotools.junenaga.com/" target="_blank" rel="noopener">
+            {m.otherTool} <span aria-hidden="true">↗</span>
+          </a>
+        </div>
         <select
           className="lang-select"
           value={lang}

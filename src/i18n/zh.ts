@@ -2,6 +2,7 @@ export const zh = {
   htmlLang: 'zh-Hant',
   siteTitle: '圖片工具箱',
   langSwitchLabel: '語言',
+  otherTool: '影片工具箱',
   listSep: '、',
   tabs: { split: '圖片分割', combine: '圖片合併', compress: '圖片壓縮', convert: '圖片轉檔' },
   consent: {

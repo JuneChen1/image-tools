@@ -31,6 +31,35 @@ html[lang^='zh'] .app-head h1 {
   letter-spacing: -0.02em;
 }
 
+/* 標題與姊妹站連結：連結在標題右側同一行（放不下時換到下一行），小字、只有底線，不搶標題的視覺重心 */
+.head-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xs) var(--space-md);
+}
+
+.other-tool {
+  padding: 2px 0;
+  border-bottom: 1px solid var(--color-line-strong);
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.other-tool:hover {
+  border-bottom-color: var(--color-fg);
+  color: var(--color-fg);
+}
+
+/* 手機寬度：連結改放標題正下方，語言選單才能留在標題右側 */
+@media (max-width: 560px) {
+  .head-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* 語言選單：小而安靜，不搶標題的視覺重心 */
 .lang-select {
   flex: none;

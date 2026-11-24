@@ -4,6 +4,7 @@ export const en: Messages = {
   htmlLang: 'en',
   siteTitle: 'Image Toolbox',
   langSwitchLabel: 'Language',
+  otherTool: 'Video Toolbox',
   listSep: ', ',
   tabs: { split: 'Split', combine: 'Combine', compress: 'Compress', convert: 'Convert' },
   consent: {

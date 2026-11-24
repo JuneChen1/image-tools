@@ -4,6 +4,7 @@ export const ja: Messages = {
   htmlLang: 'ja',
   siteTitle: '画像ツールボックス',
   langSwitchLabel: '言語',
+  otherTool: '動画ツールボックス',
   listSep: '、',
   tabs: { split: '画像分割', combine: '画像結合', compress: '画像圧縮', convert: '画像変換' },
   consent: {
