@@ -47,6 +47,8 @@ export default function SplitTab() {
   // parts 是從哪個檔案切出來的；換了來源圖，新結果出來前不顯示舊圖的切片
   const [partsFile, setPartsFile] = useState<File | null>(null)
   const [error, setError] = useState<unknown>(null)
+  // 新選的檔案讀不了的原因；和切圖處理的錯誤分開，下一次選檔時才能只清掉這個
+  const [loadError, setLoadError] = useState<unknown>(null)
   const [busy, setBusy] = useState(false)
   const sourceRef = useRef<Source | null>(null)
   // 目前畫面上顯示的結果縮圖網址；新結果出來後才釋放，處理期間舊縮圖不會變成破圖
@@ -72,10 +74,11 @@ export default function SplitTab() {
       sourceRef.current = next
       setSource(next)
       setError(null)
+      setLoadError(null)
     } catch (e) {
       if (ticket !== probeTicketRef.current) return
       const failure = e instanceof ImageError ? e : new ImageError('readFailed')
-      setError(failure)
+      setLoadError(failure)
       trackError('split', failure, '')
     }
   }
@@ -155,8 +158,13 @@ export default function SplitTab() {
 
   return (
     <div className="panel">
-      <Dropzone tool="split" label={m.split.dropLabel} onFiles={handleFiles} />
-      {error != null && <p className="error">{describeError(error, m)}</p>}
+      <Dropzone
+        tool="split"
+        label={m.split.dropLabel}
+        onFiles={handleFiles}
+        onPick={() => setLoadError(null)}
+      />
+      {(loadError ?? error) != null && <p className="error">{describeError(loadError ?? error, m)}</p>}
 
       {source && (
         <>

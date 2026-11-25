@@ -14,6 +14,8 @@ interface Props {
   currentCount?: number
   label: string
   onFiles: (files: File[]) => void
+  /** 每次選檔或拖放都會先呼叫，包含檔案全被略過、不會呼叫 onFiles 的情況；讓上層清掉上一次選檔留下的訊息 */
+  onPick?: () => void
 }
 
 export default function Dropzone({
@@ -23,6 +25,7 @@ export default function Dropzone({
   currentCount = 0,
   label,
   onFiles,
+  onPick,
 }: Props) {
   const { m } = useI18n()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -33,6 +36,7 @@ export default function Dropzone({
   const [skipped, setSkipped] = useState(0)
 
   function pick(list: FileList | null) {
+    onPick?.()
     const dropped = Array.from(list ?? [])
     const result = selectFiles(dropped, { multiple, maxFiles, currentCount })
     trackRejections(tool, result, dropped.length)
