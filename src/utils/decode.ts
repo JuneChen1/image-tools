@@ -27,6 +27,8 @@ async function decodeHeic(file: File): Promise<ImageBitmap> {
 
   const width = image.get_width()
   const height = image.get_height()
+  // 先擋像素過多的圖，再配置緩衝區（約 4 位元組 × 像素數），避免還沒檢查就把記憶體用光
+  if (width * height > MAX_PIXELS) throw new ImageError('tooLarge', MAX_MEGAPIXELS)
   const target = { data: new Uint8ClampedArray(width * height * 4), width, height }
   await new Promise<void>((resolve, reject) => {
     image.display(target, (result) =>
