@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createAnalytics, isAnalyticsEnabled, type AnalyticsDeps } from './analytics'
+import { cookieDomains, createAnalytics, isAnalyticsEnabled, type AnalyticsDeps } from './analytics'
 
 const ID = 'G-EJQ7YWC4GN'
 
@@ -155,6 +155,26 @@ describe('disable 與再次同意（撤回同意）', () => {
     const { analytics, clearCookies } = setup({ id: undefined })
     analytics.disable()
     expect(clearCookies).not.toHaveBeenCalled()
+  })
+})
+
+describe('cookieDomains：刪 cookie 時要嘗試的 domain', () => {
+  it('子網域會列出自己與每一層上層網域（GA 通常設在上層）', () => {
+    expect(cookieDomains('imagetools.junenaga.com')).toEqual([
+      '',
+      '.imagetools.junenaga.com',
+      '.junenaga.com',
+    ])
+  })
+
+  it('網域本身（兩段）只有自己', () => {
+    expect(cookieDomains('junenaga.com')).toEqual(['', '.junenaga.com'])
+  })
+
+  it('localhost 與 IP 位址不帶 domain', () => {
+    expect(cookieDomains('localhost')).toEqual([''])
+    expect(cookieDomains('127.0.0.1')).toEqual([''])
+    expect(cookieDomains('::1')).toEqual([''])
   })
 })
 

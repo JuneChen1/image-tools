@@ -98,6 +98,22 @@ export function createAnalytics(deps: AnalyticsDeps): Analytics {
   }
 }
 
+/**
+ * 刪除 cookie 時要嘗試的 domain。GA 預設把 cookie 設在上層網域（例如 .junenaga.com），
+ * 刪除時必須帶一樣的 domain 才刪得掉，所以從完整主機名稱到只剩兩段的網域都列出來。
+ * 空字串代表不帶 domain（只對目前主機）。單一標籤（localhost）與 IP 位址不需要
+ */
+export function cookieDomains(hostname: string): string[] {
+  const labels = hostname.split('.')
+  const isIp = /^[\d.]+$/.test(hostname) || hostname.includes(':')
+  if (isIp || labels.length < 2) return ['']
+  const domains = ['']
+  for (let i = 0; i <= labels.length - 2; i++) {
+    domains.push(`.${labels.slice(i).join('.')}`)
+  }
+  return domains
+}
+
 let instance: Analytics | null = null
 
 function real(): Analytics {
@@ -109,7 +125,10 @@ function real(): Analytics {
     doc: document as unknown as AnalyticsDeps['doc'],
     clearCookies: (names) => {
       for (const name of names) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+        for (const domain of cookieDomains(location.hostname)) {
+          const domainPart = domain ? `; domain=${domain}` : ''
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainPart}`
+        }
       }
     },
   })
