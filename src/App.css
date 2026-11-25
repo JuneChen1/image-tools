@@ -693,6 +693,20 @@ input[type='range']:focus-visible::-moz-range-thumb {
     padding: 32px var(--space-sm);
   }
 
+  /* 手機：右側操作放不下（例如英文的 Move up / Move down / Remove）時整組換到下一行，
+     不要把檔名擠成一兩個字一行 */
+  .result-list li {
+    flex-wrap: wrap;
+  }
+
+  .result-info {
+    flex: 1 1 7em;
+  }
+
+  .row-actions {
+    margin-left: auto;
+  }
+
   /* 手機：檔名可以換行顯示完整，不用省略號截斷 */
   .result-info strong {
     overflow-wrap: anywhere;
