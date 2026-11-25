@@ -16,10 +16,26 @@ export function isHeicFile(file: Pick<File, 'name' | 'type'>): boolean {
   return /^image\/hei[cf]/.test(file.type) || /\.(heic|heif)$/i.test(file.name)
 }
 
-/** 用 WebAssembly 解 HEIC。解碼器約 2 MB，只有遇到 HEIC 才動態載入 */
-async function decodeHeic(file: File): Promise<ImageBitmap> {
+type Libheif = Awaited<ReturnType<typeof loadLibheif>>
+let libheifPromise: Promise<Libheif> | null = null
+
+async function loadLibheif() {
   const { default: createLibheif } = await import('libheif-js/libheif-wasm/libheif-bundle.mjs')
-  const libheif = await createLibheif()
+  return createLibheif()
+}
+
+/** 解碼器只載入、初始化一次（約 2 MB 的 WebAssembly），之後的 HEIC 檔共用；載入失敗不快取，下次可以重試 */
+function getLibheif(): Promise<Libheif> {
+  libheifPromise ??= loadLibheif().catch((error) => {
+    libheifPromise = null
+    throw error
+  })
+  return libheifPromise
+}
+
+/** 用 WebAssembly 解 HEIC。解碼器只有遇到 HEIC 才動態載入 */
+async function decodeHeic(file: File): Promise<ImageBitmap> {
+  const libheif = await getLibheif()
 
   const images = new libheif.HeifDecoder().decode(new Uint8Array(await file.arrayBuffer()))
   const image = images[0]

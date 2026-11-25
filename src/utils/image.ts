@@ -252,17 +252,24 @@ export function baseName(filename: string): string {
   return dot > 0 ? filename.slice(0, dot) : filename
 }
 
-/** 同名檔案加上 (2)、(3)，避免 ZIP 內互相覆蓋 */
+/**
+ * 同名檔案加上 (2)、(3)，避免 ZIP 內互相覆蓋。
+ * 新產生的名字也會檢查有沒有被用過（例如輸入裡本來就有 "a (2).jpg"）
+ */
 export function uniqueNames(names: string[]): string[] {
-  const seen = new Map<string, number>()
+  const used = new Set<string>()
+  const lastCount = new Map<string, number>()
   return names.map((name) => {
-    const count = (seen.get(name) ?? 0) + 1
-    seen.set(name, count)
-    if (count === 1) return name
     const dot = name.lastIndexOf('.')
-    return dot > 0
-      ? `${name.slice(0, dot)} (${count})${name.slice(dot)}`
-      : `${name} (${count})`
+    const withCount = (count: number) =>
+      dot > 0 ? `${name.slice(0, dot)} (${count})${name.slice(dot)}` : `${name} (${count})`
+
+    let count = lastCount.get(name) ?? 1
+    let candidate = name
+    while (used.has(candidate)) candidate = withCount(++count)
+    lastCount.set(name, count)
+    used.add(candidate)
+    return candidate
   })
 }
 

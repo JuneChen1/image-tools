@@ -9,6 +9,8 @@ interface WorkerScope {
 }
 
 const scope = self as unknown as WorkerScope
+/** 正在處理的工作；取消訊息晚於工作完成時，不能把 id 留在 cancelled 裡沒人清 */
+const active = new Set<number>()
 const cancelled = new Set<number>()
 
 /** 讓出事件迴圈，這樣處理中也能收到取消訊息 */
@@ -60,11 +62,12 @@ scope.onmessage = async (event) => {
   const request = event.data
 
   if (request.type === 'cancel') {
-    cancelled.add(request.id)
+    if (active.has(request.id)) cancelled.add(request.id)
     return
   }
 
   const { id } = request
+  active.add(id)
   try {
     if (request.type === 'probe') {
       let probe
@@ -93,6 +96,7 @@ scope.onmessage = async (event) => {
       })
     }
   } finally {
+    active.delete(id)
     cancelled.delete(id)
   }
 }

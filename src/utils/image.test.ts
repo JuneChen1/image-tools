@@ -144,6 +144,12 @@ describe('uniqueNames', () => {
     expect(uniqueNames(['x', 'x'])).toEqual(['x', 'x (2)'])
   })
 
+  it('新產生的名字不會撞到輸入裡本來就有的名字', () => {
+    const result = uniqueNames(['a.jpg', 'a.jpg', 'a (2).jpg'])
+    expect(new Set(result).size).toBe(3)
+    expect(result.slice(0, 2)).toEqual(['a.jpg', 'a (2).jpg'])
+  })
+
   it('沒有重複時原樣回傳', () => {
     expect(uniqueNames(['a.png', 'b.png'])).toEqual(['a.png', 'b.png'])
   })
