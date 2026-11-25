@@ -27,6 +27,8 @@ interface Item {
 
 interface Combined {
   blob: Blob
+  /** 結果產生時就決定好，不隨目前選的格式變動（新結果出來前舊結果還在畫面上） */
+  name: string
   url: string
   width: number
   height: number
@@ -135,7 +137,13 @@ export default function CombineTab() {
         const previous = resultUrlRef.current
         resultUrlRef.current = url
         if (previous) URL.revokeObjectURL(previous)
-        setResult({ blob: combined.blob, url, width: combined.width, height: combined.height })
+        setResult({
+          blob: combined.blob,
+          name: `combined.${FORMAT_EXT[format]}`,
+          url,
+          width: combined.width,
+          height: combined.height,
+        })
         setError(null)
         setBusy(false)
       } catch (e) {
@@ -159,7 +167,7 @@ export default function CombineTab() {
 
   const ready = items.length >= MIN_IMAGES
   const shown = ready ? result : null
-  const resultItems = shown ? [{ name: `combined.${FORMAT_EXT[format]}`, blob: shown.blob }] : []
+  const resultItems = shown ? [{ name: shown.name, blob: shown.blob }] : []
 
   return (
     <div className="panel">
