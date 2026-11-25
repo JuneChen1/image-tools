@@ -16,9 +16,30 @@ const LANGS: { id: Lang; label: string; htmlLang: string }[] = [
   { id: 'ja', label: '日本語', htmlLang: 'ja' },
 ]
 
+/** 方向鍵、Home、End 在分頁間移動（WAI-ARIA tabs 的慣例），回傳要切到的分頁；不是這些鍵就回傳 null */
+function nextTab(current: TabId, key: string): TabId | null {
+  const index = TAB_IDS.indexOf(current)
+  switch (key) {
+    case 'ArrowRight':
+      return TAB_IDS[(index + 1) % TAB_IDS.length]
+    case 'ArrowLeft':
+      return TAB_IDS[(index - 1 + TAB_IDS.length) % TAB_IDS.length]
+    case 'Home':
+      return TAB_IDS[0]
+    case 'End':
+      return TAB_IDS[TAB_IDS.length - 1]
+    default:
+      return null
+  }
+}
+
 function App() {
   const { lang, m, setLang } = useI18n()
   const [tab, setTab] = useState<TabId>('split')
+
+  // 四個分頁都保持掛載，切換時不會丟失已上傳的圖片，所以只用 hidden 藏起來
+  const panelProps = (id: TabId) =>
+    ({ role: 'tabpanel', id: `panel-${id}`, 'aria-labelledby': `tab-${id}`, hidden: tab !== id }) as const
 
   return (
     <main className="app">
@@ -50,26 +71,36 @@ function App() {
           <button
             key={id}
             role="tab"
+            id={`tab-${id}`}
             aria-selected={tab === id}
+            aria-controls={`panel-${id}`}
+            // 只有目前的分頁在 Tab 鍵順序裡，其他分頁用方向鍵切換
+            tabIndex={tab === id ? 0 : -1}
             className={tab === id ? 'active' : ''}
             onClick={() => setTab(id)}
+            onKeyDown={(e) => {
+              const next = nextTab(id, e.key)
+              if (!next) return
+              e.preventDefault()
+              setTab(next)
+              document.getElementById(`tab-${next}`)?.focus()
+            }}
           >
             {m.tabs[id]}
           </button>
         ))}
       </nav>
 
-      {/* 四個分頁都保持掛載，切換時不會丟失已上傳的圖片 */}
-      <div hidden={tab !== 'split'}>
+      <div {...panelProps('split')}>
         <SplitTab />
       </div>
-      <div hidden={tab !== 'combine'}>
+      <div {...panelProps('combine')}>
         <CombineTab />
       </div>
-      <div hidden={tab !== 'compress'}>
+      <div {...panelProps('compress')}>
         <BatchTab mode="compress" />
       </div>
-      <div hidden={tab !== 'convert'}>
+      <div {...panelProps('convert')}>
         <BatchTab mode="convert" />
       </div>
 

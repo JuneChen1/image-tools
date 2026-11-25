@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useI18n } from '../i18n'
 import { canShareFiles, isTouchDevice, toFiles, type NamedBlob } from '../utils/share'
 
@@ -7,6 +8,7 @@ import { canShareFiles, isTouchDevice, toFiles, type NamedBlob } from '../utils/
  */
 export default function ShareHint({ items }: { items: NamedBlob[] }) {
   const { m } = useI18n()
-  if (!isTouchDevice() || !canShareFiles(toFiles(items))) return null
+  const files = useMemo(() => toFiles(items), [items])
+  if (!isTouchDevice() || !canShareFiles(files)) return null
   return <p className="hint">{m.common.shareHint}</p>
 }

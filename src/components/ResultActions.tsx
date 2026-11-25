@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { trackSaveResult, trackShareFailure, type Tool } from '../analyticsEvents'
 import { useI18n } from '../i18n'
 import { downloadBlob, downloadZip } from '../utils/image'
@@ -21,10 +21,10 @@ export default function ResultActions({ tool, items, zipName, splitParts }: Prop
   const { m } = useI18n()
   const [failed, setFailed] = useState<'share' | 'zip' | null>(null)
 
-  const files = toFiles(items)
-  const shareable = canShareFiles(files)
-
-  const blobs = items.map((item) => item.blob)
+  // items 沒變就不重建 File 與重問瀏覽器能不能分享
+  const files = useMemo(() => toFiles(items), [items])
+  const shareable = useMemo(() => canShareFiles(files), [files])
+  const blobs = useMemo(() => items.map((item) => item.blob), [items])
 
   async function onShare() {
     setFailed(null)

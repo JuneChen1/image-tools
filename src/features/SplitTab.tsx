@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
 import ResultActions from '../components/ResultActions'
 import ShareHint from '../components/ShareHint'
@@ -150,7 +150,8 @@ export default function SplitTab() {
     }
   }, [source, count, format, quality])
 
-  const partItems = parts.map((p) => ({ name: p.name, blob: p.blob }))
+  // 要穩定的參考，下游的分享按鈕才不用每次 render 都重建 File
+  const partItems = useMemo(() => parts.map((p) => ({ name: p.name, blob: p.blob })), [parts])
 
   return (
     <div className="panel">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
 import ResultActions from '../components/ResultActions'
 import ShareHint from '../components/ShareHint'
@@ -117,7 +117,11 @@ export default function BatchTab({ mode }: { mode: Mode }) {
   const showBackground = mode === 'convert' && choice === 'image/jpeg'
   const totalPercent = totalBefore > 0 ? Math.abs(Math.round((1 - totalAfter / totalBefore) * 100)) : 0
 
-  const doneItems = done.map((r) => ({ name: r.name, blob: r.blob! }))
+  // 要穩定的參考，下游的分享按鈕才不用每次 render 都重建 File
+  const doneItems = useMemo(
+    () => results.filter((r) => r.blob).map((r) => ({ name: r.name, blob: r.blob! })),
+    [results],
+  )
 
   return (
     <div className="panel">

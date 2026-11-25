@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Dropzone from '../components/Dropzone'
 import ResultActions from '../components/ResultActions'
 import ShareHint from '../components/ShareHint'
@@ -75,23 +75,11 @@ export default function CombineTab() {
       }
     })
     setError(failure)
-    setItems((old) => {
-      // 讀取尺寸期間使用者可能又加了圖，超出上限的丟掉並釋放網址
-      const next = [...old, ...added]
-      next.slice(MAX_IMAGES).forEach((item) => {
-        URL.revokeObjectURL(item.url)
-        itemUrlsRef.current.delete(item.url)
-      })
-      return next.slice(0, MAX_IMAGES)
-    })
+    // 讀取尺寸期間使用者可能又加了圖，超出上限的丟掉（它們的網址由下面的 effect 釋放）
+    setItems((old) => [...old, ...added].slice(0, MAX_IMAGES))
   }
 
   function removeItem(id: number) {
-    const target = items.find((item) => item.id === id)
-    if (target) {
-      URL.revokeObjectURL(target.url)
-      itemUrlsRef.current.delete(target.url)
-    }
     const next = items.filter((item) => item.id !== id)
     setItems(next)
     if (next.length < MIN_IMAGES) {
@@ -111,6 +99,17 @@ export default function CombineTab() {
     ;[next[index], next[target]] = [next[target], next[index]]
     setItems(next)
   }
+
+  // 縮圖網址只留給還在清單裡的圖：被移除或因超過上限被丟掉的，在這裡釋放
+  useEffect(() => {
+    const live = new Set(items.map((item) => item.url))
+    for (const url of itemUrlsRef.current) {
+      if (!live.has(url)) {
+        URL.revokeObjectURL(url)
+        itemUrlsRef.current.delete(url)
+      }
+    }
+  }, [items])
 
   useEffect(() => {
     const urls = itemUrlsRef.current
@@ -170,7 +169,7 @@ export default function CombineTab() {
 
   const ready = items.length >= MIN_IMAGES
   const shown = ready ? result : null
-  const resultItems = shown ? [{ name: shown.name, blob: shown.blob }] : []
+  const resultItems = useMemo(() => (shown ? [{ name: shown.name, blob: shown.blob }] : []), [shown])
 
   return (
     <div className="panel">
