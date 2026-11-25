@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { trackSaveResult, trackShareFailure, type Tool } from '../analyticsEvents'
+import { trackSaveResult, trackShareFailure, trackZipFailure, type Tool } from '../analyticsEvents'
 import { useI18n } from '../i18n'
 import { downloadBlob, downloadZip } from '../utils/image'
 import { canShareFiles, shareFiles, toFiles, type NamedBlob } from '../utils/share'
@@ -48,6 +48,7 @@ export default function ResultActions({ tool, items, zipName, splitParts }: Prop
     } catch (error) {
       console.error('ZIP failed', error)
       setFailed('zip')
+      trackZipFailure(tool, blobs)
     }
   }
 

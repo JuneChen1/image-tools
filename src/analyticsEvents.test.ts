@@ -13,6 +13,7 @@ import {
   trackRejections,
   trackSaveResult,
   trackShareFailure,
+  trackZipFailure,
 } from './analyticsEvents'
 import { ImageError } from './utils/image'
 
@@ -177,7 +178,14 @@ describe('errorEventOf', () => {
     })
   })
 
-  it.each(['canvasTooLarge', 'encodeFailed', 'formatUnsupported', 'readFailed', 'shareFailed'])(
+  it.each([
+    'canvasTooLarge',
+    'encodeFailed',
+    'formatUnsupported',
+    'readFailed',
+    'shareFailed',
+    'zipFailed',
+  ])(
     '%s 算 processing_error，並帶輸出格式',
     (code) => {
       expect(errorEventOf('convert', code, 'webp')).toEqual({
@@ -274,6 +282,15 @@ describe('trackXxx 真正送出的事件', () => {
       tool: 'split',
       code: 'shareFailed',
       output_format: 'png',
+    })
+  })
+
+  it('ZIP 打包失敗', () => {
+    trackZipFailure('compress', [blob('image/jpeg'), blob('image/jpeg')])
+    expect(trackEvent).toHaveBeenCalledWith('processing_error', {
+      tool: 'compress',
+      code: 'zipFailed',
+      output_format: 'jpeg',
     })
   })
 })

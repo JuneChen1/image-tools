@@ -82,6 +82,7 @@ const KNOWN_ERROR_CODES = new Set([
   'formatUnsupported',
   'readFailed',
   'shareFailed',
+  'zipFailed',
 ])
 
 /**
@@ -139,9 +140,16 @@ export function trackError(tool: Tool, error: unknown, outputFormat: string) {
   trackEvent(event.name, event.params)
 }
 
-export const trackShareFailure = (tool: Tool, blobs: Pick<Blob, 'type'>[]) =>
+const trackSaveFailure = (code: 'shareFailed' | 'zipFailed', tool: Tool, blobs: Pick<Blob, 'type'>[]) =>
   trackEvent('processing_error', {
     tool,
-    code: 'shareFailed',
+    code,
     output_format: formatLabel(blobs.map((blob) => blob.type)),
   })
+
+export const trackShareFailure = (tool: Tool, blobs: Pick<Blob, 'type'>[]) =>
+  trackSaveFailure('shareFailed', tool, blobs)
+
+/** 打包 ZIP 失敗（多半是記憶體不足） */
+export const trackZipFailure = (tool: Tool, blobs: Pick<Blob, 'type'>[]) =>
+  trackSaveFailure('zipFailed', tool, blobs)
