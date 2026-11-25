@@ -11,13 +11,15 @@ interface Props {
   zipName?: string
   /** 切圖才有：切成幾張，回報統計用 */
   splitParts?: number
+  /** 結果是舊設定產生的、新結果還在處理時停用，避免使用者存到跟畫面設定不符的檔案 */
+  disabled?: boolean
 }
 
 /**
  * 結果區右上角的按鈕：「分享 / 儲存到相簿」（支援時才顯示）與「下載全部 (ZIP)」。
  * 手機（尤其是 iPhone）下載的檔案只會進「檔案 App」，要用分享選單的「儲存影像」才進得了相簿
  */
-export default function ResultActions({ tool, items, zipName, splitParts }: Props) {
+export default function ResultActions({ tool, items, zipName, splitParts, disabled }: Props) {
   const { m } = useI18n()
   const [failed, setFailed] = useState<'share' | 'zip' | null>(null)
 
@@ -55,9 +57,14 @@ export default function ResultActions({ tool, items, zipName, splitParts }: Prop
   return (
     <div className="card-actions">
       <div className="card-actions-row">
-        {shareable && <button onClick={onShare}>{m.common.share}</button>}
+        {shareable && (
+          <button onClick={onShare} disabled={disabled}>
+            {m.common.share}
+          </button>
+        )}
         <button
           className="primary"
+          disabled={disabled}
           onClick={() => {
             if (zipName) {
               void onZip(zipName)

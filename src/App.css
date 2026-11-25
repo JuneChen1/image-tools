@@ -109,6 +109,21 @@ button.primary:hover {
   color: var(--color-accent-fg);
 }
 
+/* 停用：處理中暫時不能點（例如結果還是舊設定的），不要有 hover 變化 */
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+button:disabled:hover {
+  color: var(--color-fg-soft);
+}
+
+button.primary:disabled:hover {
+  background: var(--color-fg);
+  color: var(--color-bg);
+}
+
 /* 分段選擇：純文字，選中者加底線 */
 .segmented {
   display: flex;

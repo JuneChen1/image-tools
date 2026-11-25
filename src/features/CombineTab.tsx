@@ -278,7 +278,7 @@ export default function CombineTab() {
               <h2>{m.combine.resultTitle}</h2>
               <ShareHint items={resultItems} />
             </div>
-            <ResultActions tool="combine" items={resultItems} />
+            <ResultActions tool="combine" items={resultItems} disabled={busy} />
           </div>
           <div className="combine-result">
             <img src={shown.url} alt={m.combine.resultAlt} />

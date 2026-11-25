@@ -239,6 +239,7 @@ export default function SplitTab() {
                   splitParts={count}
                   items={partItems}
                   zipName={`${baseName(source.file.name)}_split.zip`}
+                  disabled={busy}
                 />
               </div>
               <div
@@ -253,6 +254,7 @@ export default function SplitTab() {
                         {p.width} × {p.height}・{formatSize(p.blob.size)}
                       </span>
                       <button
+                        disabled={busy}
                         onClick={() => {
                           trackSaveResult({ tool: 'split', method: 'single', blobs: [p.blob], splitParts: count })
                           downloadBlob(p.blob, p.name)

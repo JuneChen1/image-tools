@@ -225,7 +225,9 @@ export default function BatchTab({ mode }: { mode: Mode }) {
               </h2>
               {done.length > 0 && <ShareHint items={doneItems} />}
             </div>
-            {done.length > 0 && <ResultActions tool={mode} items={doneItems} zipName={zipName} />}
+            {done.length > 0 && (
+              <ResultActions tool={mode} items={doneItems} zipName={zipName} disabled={busy} />
+            )}
           </div>
 
           {mode === 'compress' && done.length > 0 && (
@@ -264,6 +266,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
                   </div>
                   {r.blob && (
                     <button
+                      disabled={busy}
                       onClick={() => {
                         trackSaveResult({ tool: mode, method: 'single', blobs: [r.blob!] })
                         downloadBlob(r.blob!, r.name)
