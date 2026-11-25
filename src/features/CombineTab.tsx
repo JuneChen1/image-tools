@@ -150,6 +150,10 @@ export default function CombineTab() {
         setBusy(false)
       } catch (e) {
         if (signal.aborted) return
+        // 這組設定失敗了，就不要再顯示上一組設定的結果，免得下載到不是目前設定的檔案
+        if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current)
+        resultUrlRef.current = null
+        setResult(null)
         setError(e)
         setBusy(false)
         // 改設定會重新處理，同一組圖片的同一個錯誤只回報一次
