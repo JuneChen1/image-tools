@@ -196,15 +196,27 @@ export interface CombineOptions {
   dividerColor: string
 }
 
+/**
+ * 合併後的尺寸是否在上限內，超過就丟 ImageError。只需要各張的寬高，
+ * 所以呼叫端可以在解碼之前先檢查，不用等所有圖都解碼完才發現太大
+ */
+export function assertCombineFits(
+  sizes: { width: number; height: number }[],
+  divider: boolean,
+): CombineLayout {
+  const layout = combineLayout(sizes, divider)
+  if (layout.width * layout.height > MAX_PIXELS) throw new ImageError('tooLarge', MAX_PIXELS / 1_000_000)
+  if (layout.height > MAX_CANVAS_EDGE) throw new ImageError('canvasTooLarge')
+  return layout
+}
+
 /** 把多張圖由上到下合併成一張。主執行緒與 Web Worker 都能呼叫 */
 export async function combineBlobs(
   bitmaps: ImageBitmap[],
   options: CombineOptions,
 ): Promise<RenderResult> {
-  const layout = combineLayout(bitmaps, options.divider)
+  const layout = assertCombineFits(bitmaps, options.divider)
   const { width, height } = layout
-  if (width * height > MAX_PIXELS) throw new ImageError('tooLarge', MAX_PIXELS / 1_000_000)
-  if (height > MAX_CANVAS_EDGE) throw new ImageError('canvasTooLarge')
 
   const surface = createSurface(width, height)
   const { ctx } = surface

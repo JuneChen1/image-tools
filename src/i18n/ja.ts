@@ -19,6 +19,7 @@ export const ja: Messages = {
     downloadAll: 'すべてダウンロード (ZIP)',
     share: '共有 / 写真に保存',
     shareFailed: '共有メニューを開けませんでした。「ダウンロード」をご利用ください。',
+    zipFailed: 'ZIP を作成できませんでした（メモリ不足の可能性があります）。1 枚ずつダウンロードしてください。',
     shareHint: 'スマホでは「共有 / 写真に保存」をタップして、写真アプリに保存してください。',
     clearAll: 'すべてクリア',
     outputFormat: '出力形式',

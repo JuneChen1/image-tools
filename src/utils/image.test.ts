@@ -3,6 +3,7 @@ import {
   FORMAT_EXT,
   FORMAT_LABEL,
   ImageError,
+  assertCombineFits,
   baseName,
   combineLayout,
   formatSize,
@@ -44,6 +45,32 @@ describe('combineLayout', () => {
     expect(layout.width).toBe(200)
     expect(layout.tiles.map((t) => [t.w, t.h])).toEqual([[200, 100], [200, 200]])
     expect(layout.height).toBe(300)
+  })
+})
+
+describe('assertCombineFits：解碼前先檢查合併後的尺寸', () => {
+  it('在上限內就回傳版面', () => {
+    const sizes = [{ width: 100, height: 50 }, { width: 100, height: 70 }]
+    expect(assertCombineFits(sizes, false)).toEqual(combineLayout(sizes, false))
+  })
+
+  it('像素太多丟 tooLarge', () => {
+    const sizes = [{ width: 8000, height: 8000 }, { width: 8000, height: 8000 }]
+    expect(() => assertCombineFits(sizes, false)).toThrowError(
+      expect.objectContaining({ code: 'tooLarge' }),
+    )
+  })
+
+  it('單邊超過 Canvas 上限丟 canvasTooLarge', () => {
+    const sizes = [{ width: 10, height: 20000 }, { width: 10, height: 20000 }]
+    expect(() => assertCombineFits(sizes, false)).toThrowError(
+      expect.objectContaining({ code: 'canvasTooLarge' }),
+    )
+  })
+
+  it('丟出的是 ImageError', () => {
+    const sizes = [{ width: 8000, height: 8000 }, { width: 8000, height: 8000 }]
+    expect(() => assertCombineFits(sizes, false)).toThrow(ImageError)
   })
 })
 

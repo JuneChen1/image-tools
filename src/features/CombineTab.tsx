@@ -7,6 +7,7 @@ import {
   FORMAT_EXT,
   FORMAT_LABEL,
   ImageError,
+  assertCombineFits,
   formatSize,
   type Format,
 } from '../utils/image'
@@ -127,6 +128,8 @@ export default function CombineTab() {
     const timer = setTimeout(async () => {
       setBusy(true)
       try {
+        // 各張的尺寸已知，先檢查合併後會不會太大，不用把全部圖解碼完才失敗
+        assertCombineFits(items, divider)
         const combined = await combineImages(
           items.map((item) => item.file),
           { format, quality: quality / 100, divider, dividerColor },

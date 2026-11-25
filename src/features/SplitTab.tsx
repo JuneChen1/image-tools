@@ -44,6 +44,8 @@ export default function SplitTab() {
   const [format, setFormat] = useState<Format>('image/png')
   const [quality, setQuality] = useState(92)
   const [parts, setParts] = useState<Part[]>([])
+  // parts 是從哪個檔案切出來的；換了來源圖，新結果出來前不顯示舊圖的切片
+  const [partsFile, setPartsFile] = useState<File | null>(null)
   const [error, setError] = useState<unknown>(null)
   const [busy, setBusy] = useState(false)
   const sourceRef = useRef<Source | null>(null)
@@ -125,6 +127,7 @@ export default function SplitTab() {
         urls.length = 0
         previous.forEach((u) => URL.revokeObjectURL(u))
         setParts(next)
+        setPartsFile(file)
         setError(null)
         setBusy(false)
       } catch (e) {
@@ -213,7 +216,7 @@ export default function SplitTab() {
             {busy && <p className="hint">{m.common.processing}</p>}
           </section>
 
-          {parts.length === count && (
+          {parts.length === count && partsFile === source.file && (
             <section className="card">
               <div className="card-head">
                 <div className="card-head-text">

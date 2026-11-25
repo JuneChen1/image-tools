@@ -19,7 +19,7 @@ interface Props {
  */
 export default function ResultActions({ tool, items, zipName, splitParts }: Props) {
   const { m } = useI18n()
-  const [failed, setFailed] = useState(false)
+  const [failed, setFailed] = useState<'share' | 'zip' | null>(null)
 
   const files = toFiles(items)
   const shareable = canShareFiles(files)
@@ -27,15 +27,27 @@ export default function ResultActions({ tool, items, zipName, splitParts }: Prop
   const blobs = items.map((item) => item.blob)
 
   async function onShare() {
-    setFailed(false)
+    setFailed(null)
     try {
       // 使用者自己關掉分享選單（cancelled）不算「存下結果」
       if ((await shareFiles(files)) === 'shared') {
         trackSaveResult({ tool, method: 'share', blobs, splitParts })
       }
     } catch {
-      setFailed(true)
+      setFailed('share')
       trackShareFailure(tool, blobs)
+    }
+  }
+
+  async function onZip(name: string) {
+    setFailed(null)
+    try {
+      await downloadZip(items, name)
+      // 打包成功、下載開始後才算「存下結果」
+      trackSaveResult({ tool, method: 'zip', blobs, splitParts })
+    } catch (error) {
+      console.error('ZIP failed', error)
+      setFailed('zip')
     }
   }
 
@@ -47,8 +59,7 @@ export default function ResultActions({ tool, items, zipName, splitParts }: Prop
           className="primary"
           onClick={() => {
             if (zipName) {
-              trackSaveResult({ tool, method: 'zip', blobs, splitParts })
-              downloadZip(items, zipName)
+              void onZip(zipName)
             } else {
               trackSaveResult({ tool, method: 'single', blobs })
               downloadBlob(items[0].blob, items[0].name)
@@ -58,7 +69,7 @@ export default function ResultActions({ tool, items, zipName, splitParts }: Prop
           {zipName ? m.common.downloadAll : m.common.download}
         </button>
       </div>
-      {failed && <p className="error">{m.common.shareFailed}</p>}
+      {failed && <p className="error">{failed === 'zip' ? m.common.zipFailed : m.common.shareFailed}</p>}
     </div>
   )
 }

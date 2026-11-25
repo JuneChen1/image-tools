@@ -19,6 +19,7 @@ export const en: Messages = {
     downloadAll: 'Download all (ZIP)',
     share: 'Share / Save to Photos',
     shareFailed: 'Could not open the share sheet. Please use Download instead.',
+    zipFailed: 'Could not create the ZIP (possibly out of memory). Please download the files one by one.',
     shareHint: 'On a phone, tap “Share / Save to Photos” to save to your photo library.',
     clearAll: 'Clear all',
     outputFormat: 'Output format',
