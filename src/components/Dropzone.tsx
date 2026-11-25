@@ -12,6 +12,8 @@ interface Props {
   maxFiles?: number
   /** 目前已加入幾張，用來算還剩多少名額 */
   currentCount?: number
+  /** 清單裡已經有的檔案；再選到同一個檔案時略過並提示，不重複加入 */
+  existing?: File[]
   label: string
   onFiles: (files: File[]) => void
   /** 每次選檔或拖放都會先呼叫，包含檔案全被略過、不會呼叫 onFiles 的情況；讓上層清掉上一次選檔留下的訊息 */
@@ -23,6 +25,7 @@ export default function Dropzone({
   multiple = false,
   maxFiles,
   currentCount = 0,
+  existing,
   label,
   onFiles,
   onPick,
@@ -32,15 +35,17 @@ export default function Dropzone({
   const [dragging, setDragging] = useState(false)
   const [rejected, setRejected] = useState<string[]>([])
   const [oversized, setOversized] = useState<string[]>([])
+  const [duplicates, setDuplicates] = useState<string[]>([])
   const [tooMany, setTooMany] = useState(false)
   const [skipped, setSkipped] = useState(0)
 
   function pick(list: FileList | null) {
     onPick?.()
     const dropped = Array.from(list ?? [])
-    const result = selectFiles(dropped, { multiple, maxFiles, currentCount })
+    const result = selectFiles(dropped, { multiple, maxFiles, currentCount, existing })
     trackRejections(tool, result, dropped.length)
     setRejected(result.unsupported)
+    setDuplicates(result.duplicates)
     setOversized(result.oversized)
     setTooMany(result.tooMany)
     setSkipped(result.skipped)
@@ -107,6 +112,11 @@ export default function Dropzone({
       {oversized.length > 0 && (
         <p className="error rejected">
           {m.dropzone.tooBig(oversized.length, MAX_FILE_MB, oversized.join(m.listSep))}
+        </p>
+      )}
+      {duplicates.length > 0 && (
+        <p className="error rejected">
+          {m.dropzone.duplicate(duplicates.length, duplicates.join(m.listSep))}
         </p>
       )}
       {rejected.length > 0 && (

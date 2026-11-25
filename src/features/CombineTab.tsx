@@ -182,6 +182,7 @@ export default function CombineTab() {
         multiple
         maxFiles={MAX_IMAGES}
         currentCount={items.length}
+        existing={items.map((item) => item.file)}
         label={m.combine.dropLabel(MAX_IMAGES)}
         onFiles={handleFiles}
       />

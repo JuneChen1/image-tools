@@ -8,7 +8,10 @@ export const ACCEPT_ATTR = [...ACCEPTED_TYPES, 'image/heic', 'image/heif', '.hei
   ',',
 )
 
-type FileLike = Pick<File, 'name' | 'type' | 'size'>
+type FileLike = Pick<File, 'name' | 'type' | 'size'> & { lastModified?: number }
+
+/** 同名、同大小、同修改時間就當作同一個檔案（瀏覽器拿不到檔案路徑，只能這樣判斷） */
+const identity = (file: FileLike) => `${file.name}|${file.size}|${file.lastModified ?? 0}`
 
 export const isAccepted = (file: FileLike) =>
   ACCEPTED_TYPES.includes(file.type) || isHeicFile(file)
@@ -20,6 +23,8 @@ export interface SelectOptions {
   maxFiles?: number
   /** 目前已加入幾張，用來算還剩多少名額 */
   currentCount?: number
+  /** 清單裡已經有的檔案；選到同一個檔案時略過，不重複加入 */
+  existing?: FileLike[]
 }
 
 export interface Selection<T extends FileLike> {
@@ -31,6 +36,8 @@ export interface Selection<T extends FileLike> {
   oversized: string[]
   /** 只收一張的上傳區卻選了多張：整批不處理（不悄悄只挑第一張） */
   tooMany: boolean
+  /** 清單裡已經有了、所以略過的檔名 */
+  duplicates: string[]
   /** 因為超過張數上限而略過的張數 */
   skipped: number
 }
@@ -41,19 +48,24 @@ export interface Selection<T extends FileLike> {
  */
 export function selectFiles<T extends FileLike>(
   all: T[],
-  { multiple, maxFiles, currentCount = 0 }: SelectOptions,
+  { multiple, maxFiles, currentCount = 0, existing = [] }: SelectOptions,
 ): Selection<T> {
   const accepted = all.filter(isAccepted)
-  const files = accepted.filter((f) => f.size <= MAX_FILE_BYTES)
+  const sized = accepted.filter((f) => f.size <= MAX_FILE_BYTES)
   const unsupported = all.filter((f) => !isAccepted(f)).map((f) => f.name)
   const oversized = accepted.filter((f) => f.size > MAX_FILE_BYTES).map((f) => f.name)
 
-  if (!multiple && files.length > 1) {
-    return { taken: [], unsupported, oversized, tooMany: true, skipped: 0 }
+  if (!multiple && sized.length > 1) {
+    return { taken: [], unsupported, oversized, tooMany: true, duplicates: [], skipped: 0 }
   }
+
+  // 已經在清單裡的不重複加入，也不佔張數上限
+  const have = new Set(existing.map(identity))
+  const files = sized.filter((f) => !have.has(identity(f)))
+  const duplicates = sized.filter((f) => have.has(identity(f))).map((f) => f.name)
 
   // 多選的上傳區：依選取順序收到上限為止，超過的略過
   const room = multiple && maxFiles !== undefined ? Math.max(0, maxFiles - currentCount) : files.length
   const taken = files.slice(0, room)
-  return { taken, unsupported, oversized, tooMany: false, skipped: files.length - taken.length }
+  return { taken, unsupported, oversized, tooMany: false, duplicates, skipped: files.length - taken.length }
 }

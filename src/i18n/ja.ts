@@ -34,6 +34,8 @@ export const ja: Messages = {
     tooBig: (count, mb, names) =>
       `サイズが大きすぎるファイルを ${count} 件スキップしました（1 ファイルの上限 ${mb} MB）：${names}`,
     rejected: (count, names) => `未対応のファイルを ${count} 件スキップしました：${names}`,
+    duplicate: (count, names) =>
+      `重複しているファイルを ${count} 件スキップしました（すでにリストにあります）：${names}`,
   },
   errors: {
     generic: '処理に失敗しました',

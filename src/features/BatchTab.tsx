@@ -130,6 +130,7 @@ export default function BatchTab({ mode }: { mode: Mode }) {
         multiple
         maxFiles={MAX_FILES}
         currentCount={files.length}
+        existing={files}
         label={
           mode === 'compress'
             ? m.batch.compressDropLabel(MAX_FILES)

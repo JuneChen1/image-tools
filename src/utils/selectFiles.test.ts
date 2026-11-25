@@ -52,6 +52,7 @@ describe('selectFiles：一般篩選', () => {
       unsupported: [],
       oversized: [],
       tooMany: false,
+      duplicates: [],
       skipped: 0,
     })
   })
@@ -183,5 +184,46 @@ describe('selectFiles：多選的張數上限（壓縮、轉檔是 10 張）', (
     expect(result.taken).toHaveLength(10)
     expect(result.skipped).toBe(0)
     expect(result.unsupported).toEqual(['x.gif'])
+  })
+})
+
+describe('selectFiles：重複的檔案', () => {
+  const g = (name: string, size = 1000, lastModified = 1) => ({ ...f(name, 'image/png', size), lastModified })
+
+  it('清單裡已經有的同一個檔案略過並列出檔名，其他照收', () => {
+    const result = selectFiles([g('a.png'), g('b.png')], { multiple: true, existing: [g('a.png')] })
+    expect(names(result.taken)).toEqual(['b.png'])
+    expect(result.duplicates).toEqual(['a.png'])
+    expect(result.skipped).toBe(0)
+  })
+
+  it('同名但大小或修改時間不同，是不同的檔案', () => {
+    const existing = [g('a.png', 1000, 1)]
+    expect(names(selectFiles([g('a.png', 2000, 1)], { multiple: true, existing }).taken)).toEqual(['a.png'])
+    expect(names(selectFiles([g('a.png', 1000, 2)], { multiple: true, existing }).taken)).toEqual(['a.png'])
+  })
+
+  it('不同資料夾的同名檔案，內容不同就都收', () => {
+    const result = selectFiles([g('IMG_1.png', 500, 10)], { multiple: true, existing: [g('IMG_1.png', 900, 10)] })
+    expect(names(result.taken)).toEqual(['IMG_1.png'])
+    expect(result.duplicates).toEqual([])
+  })
+
+  it('重複的不佔張數上限，也不算超量略過', () => {
+    const result = selectFiles([g('a.png'), g('b.png')], {
+      multiple: true,
+      maxFiles: 2,
+      currentCount: 1,
+      existing: [g('a.png')],
+    })
+    expect(names(result.taken)).toEqual(['b.png'])
+    expect(result.duplicates).toEqual(['a.png'])
+    expect(result.skipped).toBe(0)
+  })
+
+  it('沒給 existing 就不檢查重複', () => {
+    const result = selectFiles([g('a.png')], { multiple: true })
+    expect(names(result.taken)).toEqual(['a.png'])
+    expect(result.duplicates).toEqual([])
   })
 })

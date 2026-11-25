@@ -32,6 +32,7 @@ export const zh = {
     tooBig: (count: number, mb: number, names: string) =>
       `已略過 ${count} 個過大的檔案（單檔上限 ${mb} MB）：${names}`,
     rejected: (count: number, names: string) => `已略過 ${count} 個不支援的檔案：${names}`,
+    duplicate: (count: number, names: string) => `已略過 ${count} 個重複的檔案（清單裡已經有了）：${names}`,
   },
   errors: {
     generic: '處理失敗',

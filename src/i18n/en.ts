@@ -36,6 +36,8 @@ export const en: Messages = {
       `Skipped ${count} oversized ${count === 1 ? 'file' : 'files'} (limit ${mb} MB per file): ${names}`,
     rejected: (count, names) =>
       `Skipped ${count} unsupported ${count === 1 ? 'file' : 'files'}: ${names}`,
+    duplicate: (count, names) =>
+      `Skipped ${count} duplicate ${count === 1 ? 'file' : 'files'} (already in the list): ${names}`,
   },
   errors: {
     generic: 'Something went wrong',
