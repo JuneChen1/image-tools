@@ -207,6 +207,8 @@ export default function BatchTab({ mode }: { mode: Mode }) {
             <p className="hint">{m.batch.convertJpegNote}</p>
           )}
           {choice === 'image/avif' && <p className="hint">{m.common.avifSlowNote}</p>}
+          {/* 第一輪結果出來前還沒有結果區，處理中的提示要放在這裡才看得到 */}
+          {busy && results.length === 0 && <p className="hint">{m.common.processing}</p>}
         </section>
       )}
 

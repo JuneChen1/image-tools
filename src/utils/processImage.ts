@@ -18,6 +18,13 @@ export class AbortedError extends Error {
   }
 }
 
+/** Worker 本身用不了（建立或載入失敗）：之後都改用主執行緒 */
+class WorkerUnavailableError extends Error {
+  constructor() {
+    super('worker unavailable')
+  }
+}
+
 interface Pending {
   resolve: (response: OkResponse) => void
   reject: (error: Error) => void
@@ -25,6 +32,8 @@ interface Pending {
 
 let worker: Worker | null = null
 let workerBroken = false
+/** 有過任何一次回覆，代表 Worker 的程式碼載得進來；之後再出事就是處理途中崩潰，不是用不了 */
+let workerResponded = false
 let nextId = 0
 const pending = new Map<number, Pending>()
 
@@ -49,6 +58,7 @@ function getWorker(): Worker {
   })
 
   created.onmessage = (event: MessageEvent<WorkerResponse>) => {
+    workerResponded = true
     const response = event.data
     const entry = pending.get(response.id)
     if (!entry) return // 已被取消的工作，結果直接丟掉
@@ -60,12 +70,14 @@ function getWorker(): Worker {
     else entry.reject(new Error(response.message))
   }
 
-  // Worker 本身載入或執行失敗：通知所有等待中的工作，並丟掉這個 Worker
+  // Worker 載入或執行失敗：通知所有等待中的工作，並丟掉這個 Worker（下次會建新的）。
+  // 還沒回覆過就出錯是載入失敗，之後改用主執行緒；回覆過才出錯多半是大圖把記憶體用光，
+  // 這時在主執行緒重跑只會讓整個分頁一起當掉，所以直接回報「圖片太大」
   created.onerror = (event) => {
     event.preventDefault()
     created.terminate()
     if (worker === created) worker = null
-    failAll(new Error('worker crashed'))
+    failAll(workerResponded ? new ImageError('canvasTooLarge') : new WorkerUnavailableError())
   }
 
   worker = created
@@ -79,7 +91,12 @@ function dispatch(
 ): Promise<OkResponse> {
   if (signal?.aborted) return Promise.reject(new AbortedError())
 
-  const target = getWorker()
+  let target: Worker
+  try {
+    target = getWorker()
+  } catch {
+    throw new WorkerUnavailableError() // 例如瀏覽器不支援 module Worker
+  }
   const id = nextId++
 
   return new Promise((resolve, reject) => {
@@ -158,14 +175,17 @@ async function probeOnMainThread(file: File): Promise<ProbeResult> {
   }
 }
 
-/** 先試 Worker；Worker 本身出問題（不是圖片的問題）就改用主執行緒，之後也都走主執行緒 */
+/**
+ * 先試 Worker；只有 Worker 本身用不了（建立或載入失敗）才改用主執行緒，之後也都走主執行緒。
+ * 處理途中出的錯（圖片問題、崩潰）照實回報，不在主執行緒重跑
+ */
 async function withFallback<T>(inWorker: () => Promise<T>, onMainThread: () => Promise<T>): Promise<T> {
   if (workerSupported()) {
     try {
       return await inWorker()
     } catch (error) {
-      if (error instanceof ImageError || error instanceof AbortedError) throw error
-      console.warn('Image worker failed, falling back to main thread', error)
+      if (!(error instanceof WorkerUnavailableError)) throw error
+      console.warn('Image worker unavailable, falling back to main thread', error)
       workerBroken = true
     }
   }

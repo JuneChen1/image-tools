@@ -94,7 +94,8 @@ export default function SplitTab() {
     const controller = new AbortController()
     const urls: string[] = []
 
-    ;(async () => {
+    // 拖動品質滑桿時每一格都會觸發，等設定停下來再處理，避免 Worker 堆積重複的解碼工作
+    const timer = setTimeout(async () => {
       setBusy(true)
       try {
         if (width < count) throw new ImageError('tooNarrow', count)
@@ -140,10 +141,11 @@ export default function SplitTab() {
           trackError('split', e, format)
         }
       }
-    })()
+    }, 250)
 
     return () => {
       controller.abort()
+      clearTimeout(timer)
       urls.forEach((u) => URL.revokeObjectURL(u))
     }
   }, [source, count, format, quality])
