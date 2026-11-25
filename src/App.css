@@ -9,6 +9,11 @@
   letter-spacing: 0.04em;
 }
 
+/* 數字加單位（如「3.70 MB」）不要在中間斷行 */
+.nowrap {
+  white-space: nowrap;
+}
+
 /* 頁首 */
 .app-head {
   display: flex;
@@ -354,6 +359,11 @@ button.primary:disabled:hover {
   font-size: 14px;
 }
 
+/* 說明文字換行時盡量平均，避免日文、中文最後一行只剩一兩個字 */
+.dropzone span {
+  text-wrap: balance;
+}
+
 /* 設定欄位 */
 .options {
   display: flex;
@@ -681,6 +691,13 @@ input[type='range']:focus-visible::-moz-range-thumb {
 
   .dropzone {
     padding: 32px var(--space-sm);
+  }
+
+  /* 手機：檔名可以換行顯示完整，不用省略號截斷 */
+  .result-info strong {
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
   }
 
   .consent-inner {

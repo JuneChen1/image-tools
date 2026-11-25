@@ -252,7 +252,11 @@ export default function BatchTab({ mode }: { mode: Mode }) {
                     <strong>{r.name}</strong>
                     {r.blob ? (
                       <span>
-                        {r.width} × {r.height}・{formatSize(r.file.size)} → {formatSize(r.blob.size)}
+                        <span className="nowrap">
+                          {r.width} × {r.height}
+                        </span>
+                        <span className="nowrap">・{formatSize(r.file.size)}</span> →{' '}
+                        <span className="nowrap">{formatSize(r.blob.size)}</span>
                         {mode === 'compress' && (
                           <em className={delta >= 0 ? 'good' : 'bad'}>
                             {' '}

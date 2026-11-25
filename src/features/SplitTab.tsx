@@ -251,7 +251,10 @@ export default function SplitTab() {
                     <img src={p.url} alt={p.name} />
                     <figcaption>
                       <span>
-                        {p.width} × {p.height}・{formatSize(p.blob.size)}
+                        <span className="nowrap">
+                          {p.width} × {p.height}
+                        </span>
+                        <span className="nowrap">・{formatSize(p.blob.size)}</span>
                       </span>
                       <button
                         disabled={busy}

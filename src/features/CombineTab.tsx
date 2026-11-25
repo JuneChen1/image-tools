@@ -197,7 +197,10 @@ export default function CombineTab() {
                 <div className="result-info">
                   <strong>{item.file.name}</strong>
                   <span>
-                    {item.width} × {item.height}・{formatSize(item.file.size)}
+                    <span className="nowrap">
+                      {item.width} × {item.height}
+                    </span>
+                    <span className="nowrap">・{formatSize(item.file.size)}</span>
                   </span>
                 </div>
                 <div className="row-actions">
